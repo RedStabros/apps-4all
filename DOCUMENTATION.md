@@ -2,6 +2,8 @@
 
 Bienvenido a la documentación técnica, arquitectónica, legal y operativa del ecosistema **Para Todos (4All)**. Este documento es la **fuente única de verdad** para el mantenimiento del monorepositorio, la publicación de aplicaciones y la protección de los derechos de autor.
 
+> 🛠️ **¿Clonaste este repo en una PC nueva?** Consulta primero [SETUP_DEV_ENVIRONMENT.md](./SETUP_DEV_ENVIRONMENT.md) para instalar Node, pnpm, Java 21, Android SDK 35 + NDK/CMake y configurar tus llaves de firma en minutos.
+
 ---
 
 ## 1. Filosofía Central y Principios No Negociables
