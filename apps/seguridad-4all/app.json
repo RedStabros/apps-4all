@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Seguridad 4All",
+    "slug": "seguridad-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.seguridad4all",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usa Face ID para desbloquear tu bóveda cifrada de contraseñas locales."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.seguridad4all",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

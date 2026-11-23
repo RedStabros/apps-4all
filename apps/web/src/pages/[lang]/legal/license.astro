@@ -1,0 +1,227 @@
+---
+// license.astro — Términos de Licencia, Propiedad Intelectual y Protección de Venta Futura (M&A)
+import Layout from '../../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+  const locales = [
+    "en", "es", "pt", "it", "tr", "pl", "hi", "id", "ru", "fr", "de", "zh-CN", "zh-TW", "ko", "ja", "vi", "th",
+    "bn", "fil", "sw", "ha", "ms", "uk", "ta", "te", "mr"
+  ];
+  return locales.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+
+const translations = {
+  en: {
+    title: "Software License & Intellectual Property",
+    subtitle: "Legal framework governing the 4All Ecosystem, commercial restrictions, and future asset transfer rights.",
+    lastUpdated: "Last Updated: September 10, 2026",
+    backHome: "← Back to Home",
+    polyformAlertTitle: "Governing License: PolyForm Noncommercial License 1.0.0",
+    polyformAlertDesc: "The 4All ecosystem source code and applications are distributed under the PolyForm Noncommercial License 1.0.0 (SPDX: PolyForm-Noncommercial-1.0.0). Personal, academic, and non-commercial use is 100% free. Any commercial exploitation, resale, or unauthorized redistribution by third parties is strictly prohibited.",
+    sections: [
+      {
+        title: "1. Grant of License for Noncommercial Use",
+        content: [
+          "Under the PolyForm Noncommercial License 1.0.0, you are granted a non-exclusive, royalty-free, worldwide license to download, install, run, test, and use each application of the 4All Ecosystem solely for personal, educational, and non-commercial purposes.",
+          "You may audit, inspect, and compile the source code for personal evaluation and privacy verification."
+        ]
+      },
+      {
+        title: "2. Absolute Reservation of Intellectual Property Rights",
+        content: [
+          "All rights, title, copyright, ownership, trademarks, service marks, logos, visual assets, C++ DSP algorithms, cryptographic architectures, and software design across all 15 applications and the web portal remain the sole, exclusive property of the Original Author and Creator.",
+          "This ecosystem is NOT released under permissive open-source licenses (such as MIT, BSD, or Apache 2.0) nor viral copyleft licenses (such as GNU GPL or AGPL). No commercial rights are granted to the general public or third-party organizations."
+        ]
+      },
+      {
+        title: "3. Express Commercial Restrictions for Third Parties",
+        content: [
+          "Commercial Use Prohibition: You may NOT sell, license, rent, lease, monetize, bundle, embed into paid products, or generate commercial revenue from any part of this software, binaries, or source code.",
+          "Redistribution Restriction: You may not publish modified commercial clones, repackage APKs on commercial app stores without prior written consent, or remove copyright and attribution notices.",
+          "No Trademark Rights: The '4All' and 'Para Todos' branding, visual origami icons, and names are proprietary assets."
+        ]
+      },
+      {
+        title: "4. Full Reservation of Rights for Future Sale and Asset Transfer (Exit / M&A)",
+        content: [
+          "As the sole Original Author and Copyright Holder, the Creator is not bound by the non-commercial limitations granted to the public and holds the full, unencumbered, exclusive legal power to:",
+          "• Sell, assign, transfer, or convey the intellectual property, copyright, source code, domains, and branding of any individual application (e.g. Apuntes 4All, QR 4All, Reproductor 4All) or the entire 15-app ecosystem to third-party purchasers, corporate acquirers, or investment funds.",
+          "• Execute exclusive commercial relicensing agreements, proprietary licensing, or asset purchase agreements (APA) under any financial terms agreed upon.",
+          "• Following an asset sale, the legitimate acquirer shall enjoy full commercial exploitation rights free of viral copyleft constraints."
+        ]
+      },
+      {
+        title: "5. Modular Asset Independence",
+        content: [
+          "Each application within the apps/ directory is architected as an independent, decoupled project with its own unique bundle identifier, assets, and dependency graph.",
+          "This architecture guarantees that individual applications can be spun off, assigned, licensed, or sold independently without legal or technical entanglement with other ecosystem components."
+        ]
+      },
+      {
+        title: "6. Canonical Reference and Official Terms",
+        content: [
+          "The complete legal text of the PolyForm Noncommercial License 1.0.0 is published by the PolyForm Project at: https://polyformproject.org/licenses/noncommercial/1.0.0/",
+          "For formal inquiries regarding corporate acquisition, commercial licensing, or proprietary asset purchase, please contact the author via the official repository channels."
+        ]
+      }
+    ]
+  },
+  es: {
+    title: "Licencia de Software y Propiedad Intelectual",
+    subtitle: "Marco legal del Ecosistema 4All, restricciones comerciales y reserva de derechos para venta de activos.",
+    lastUpdated: "Última Actualización: 10 de Septiembre de 2026",
+    backHome: "← Volver al Inicio",
+    polyformAlertTitle: "Licencia Rectora: PolyForm Noncommercial License 1.0.0",
+    polyformAlertDesc: "El código fuente y los binarios del ecosistema 4All se publican bajo la licencia PolyForm Noncommercial 1.0.0 (SPDX: PolyForm-Noncommercial-1.0.0). El uso personal, educativo y no comercial es 100% gratuito. Queda estrictamente prohibida cualquier explotación comercial, reventa o monetización por parte de terceros.",
+    sections: [
+      {
+        title: "1. Concesión de Licencia para Uso No Comercial",
+        content: [
+          "Bajo los términos de la PolyForm Noncommercial License 1.0.0, se concede a cada usuario una licencia gratuita, no exclusiva, mundial y revocable para descargar, instalar, ejecutar, probar y utilizar las aplicaciones del Ecosistema 4All exclusivamente con fines personales, académicos y no comerciales.",
+          "Los usuarios tienen pleno derecho a auditar, inspeccionar y compilar el código fuente para fines de verificación de privacidad y seguridad."
+        ]
+      },
+      {
+        title: "2. Reserva Absoluta de Derechos de Propiedad Intelectual",
+        content: [
+          "Todos los derechos morales y patrimoniales de autor, títulos de propiedad, marcas registradas, logotipos, activos visuales de origami neón, algoritmos DSP en C++, esquemas criptográficos y código fuente de las 15 aplicaciones y el portal web son propiedad única y exclusiva del Autor y Creador Original.",
+          "Este software NO se distribuye bajo licencias de código abierto permisivas (como MIT, Apache o BSD) ni bajo licencias virales copyleft (como GPL o AGPL). No se transfiere ningún derecho de explotación comercial al público general."
+        ]
+      },
+      {
+        title: "3. Restricciones Comerciales Expresas para Terceros",
+        content: [
+          "Prohibición de Uso Comercial: Ningún tercero, persona natural o jurídica puede vender, licenciar, arrendar, monetizar, incluir en productos de pago o generar ingresos directos o indirectos a partir de este software o su código fuente.",
+          "Restricción de Redistribución: Queda prohibida la publicación de clones derivados con fines de lucro, la resubida de APKs a tiendas comerciales sin autorización escrita previa y la eliminación de notas de autoría o copyright.",
+          "Protección de Marca: Las denominaciones '4All', 'Para Todos', la identidad visual y los iconos oficiales son activos protegidos de uso reservado."
+        ]
+      },
+      {
+        title: "4. Reserva Exclusiva de Derechos para Venta Futura o Traspaso de Activos (M&A / Exit)",
+        content: [
+          "Como Autor Original y Titular Único de los Derechos de Autor (Copyright Holder), el Creador no está sujeto a las limitaciones no comerciales que concede al público y conserva la potestad jurídica plena, exclusiva e incondicional para:",
+          "• Vender, ceder, transferir o traspasar la titularidad completa de la propiedad intelectual, marcas, dominios y código fuente de cualquiera de las 15 aplicaciones de manera individual (ej. Apuntes 4All, QR 4All, Reproductor 4All, etc.) o del ecosistema en su totalidad a terceros adquirentes, empresas o fondos de inversión.",
+          "• Otorgar licencias comerciales propietarias exclusivas o firmar contratos de compraventa de activos de software (Asset Purchase Agreements) bajo las cifras y condiciones que el Autor libremente pacte.",
+          "• Tras una venta o cesión de activos, el comprador adquiere la plena facultad de explotación comercial del software adquirido, libre de ataduras de licencias copyleft."
+        ]
+      },
+      {
+        title: "5. Modularidad e Independencia de Activos",
+        content: [
+          "Cada aplicación en el directorio apps/ ha sido diseñada como un módulo autónomo, desacoplado y con identificador de paquete independiente.",
+          "Esta arquitectura garantiza la viabilidad jurídica y técnica de vender o transferir una sola aplicación de manera aislada sin afectar ni comprometer la titularidad de las aplicaciones restantes del ecosistema."
+        ]
+      },
+      {
+        title: "6. Referencia Canónica y Términos Oficiales",
+        content: [
+          "El texto legal completo y oficial de la PolyForm Noncommercial License 1.0.0 se encuentra disponible para consulta pública en: https://polyformproject.org/licenses/noncommercial/1.0.0/",
+          "Para consultas formales relativas a adquisición corporativa de activos, licenciamiento comercial o auditoría de compraventa, contactar al autor a través de los canales oficiales del repositorio."
+        ]
+      }
+    ]
+  },
+  pt: {
+    title: "Licença de Software e Propriedade Intelectual",
+    subtitle: "Estrutura jurídica do Ecossistema 4All, restrições comerciais e reserva de direitos de venda futura.",
+    lastUpdated: "Última Actualização: 10 de Setembro de 2026",
+    backHome: "← Voltar ao Início",
+    polyformAlertTitle: "Licença Regente: PolyForm Noncommercial License 1.0.0",
+    polyformAlertDesc: "O código-fonte e os aplicativos do ecossistema 4All são publicados sob a licença PolyForm Noncommercial 1.0.0. O uso pessoal e não comercial é 100% gratuito. Qualquer comercialização ou revenda por terceiros é estritamente proibida.",
+    sections: [
+      {
+        title: "1. Concessão de Licença Não Comercial",
+        content: [
+          "Sob a PolyForm Noncommercial License 1.0.0, é concedida uma licença gratuita e não comercial para baixar, usar e auditar os aplicativos 4All para fins pessoais e educativos."
+        ]
+      },
+      {
+        title: "2. Reserva de Propriedade Intelectual",
+        content: [
+          "Todos os direitos autorais, marcas e código-fonte pertencem exclusivamente ao Autor e Criador Original. Esta não é uma licença de código aberto permissiva (como MIT ou GPL)."
+        ]
+      },
+      {
+        title: "3. Proibições Comerciais",
+        content: [
+          "É estritamente proibido vender, sublicenciar ou monetizar este software por qualquer terceiro sem autorização prévia por escrito."
+        ]
+      },
+      {
+        title: "4. Reserva de Direitos de Venda Futura (M&A)",
+        content: [
+          "O Autor reserva-se o direito exclusivo de vender, transferir ou ceder a propriedade intelectual de qualquer um dos aplicativos individualmente ou de todo o ecossistema a investidores e adquirentes comerciais."
+        ]
+      }
+    ]
+  }
+};
+
+const t = translations[lang] || translations.en;
+---
+
+<Layout title={`${t.title} — 4All`} description={t.subtitle} lang={lang}>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-zinc-900 dark:text-zinc-100 transition-colors">
+    <!-- Navegación de retorno -->
+    <a
+      href={`/${lang}/`}
+      class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-primary-dark hover:underline mb-8"
+    >
+      {t.backHome}
+    </a>
+
+    <!-- Encabezado -->
+    <header class="mb-10">
+      <div class="inline-flex items-center gap-2 p-3 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-2xl mb-5">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-wider">PolyForm Noncommercial 1.0.0</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
+        {t.title}
+      </h1>
+      <p class="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 mb-3 leading-relaxed">
+        {t.subtitle}
+      </p>
+      <p class="text-xs font-semibold text-zinc-500 dark:text-zinc-500">
+        {t.lastUpdated}
+      </p>
+    </header>
+
+    <!-- Alerta destacado de PolyForm Noncommercial -->
+    <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 mb-12">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl flex-shrink-0">⚖️</span>
+        <div>
+          <h2 class="text-base font-bold mb-1">{t.polyformAlertTitle}</h2>
+          <p class="text-sm leading-relaxed text-zinc-700 dark:text-amber-100/90">{t.polyformAlertDesc}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secciones Legales Estructuradas -->
+    <div class="space-y-10">
+      {t.sections.map((section) => (
+        <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm">
+          <h2 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white mb-4">
+            {section.title}
+          </h2>
+          <div class="space-y-3 text-sm sm:text-base text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            {section.content.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- Pie de página de la licencia -->
+    <div class="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <p>Para Todos (4All) Ecosystem · Copyright © 2026. Todos los derechos reservados.</p>
+    </div>
+  </main>
+</Layout>

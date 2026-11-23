@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Notas de Voz 4All",
+    "slug": "notas-voz-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.notasvoz4all",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Usa el micrófono para grabar notas de voz 100% locales en tu dispositivo."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "package": "com.apps4all.notasvoz4all"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Notas de Voz 4All to access your microphone."
+        }
+      ]
+    ],
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

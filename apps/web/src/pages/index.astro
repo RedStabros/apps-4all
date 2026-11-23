@@ -1,0 +1,32 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=/en/" />
+  <title>Para Todos (4All) - Redirecting</title>
+  <script>
+    const userLang = navigator.language || navigator.userLanguage;
+    const lang = userLang.split('-')[0];
+    const supportedLocales = [
+      "en", "es", "pt", "it", "tr", "pl", "hi", "id", "ru", "fr", "de", "zh-CN", "zh-TW", "ko", "ja", "vi", "th",
+      "bn", "fil", "sw", "ha", "ms", "uk", "ta", "te", "mr"
+    ];
+    let redirect = '/en/';
+    
+    if (supportedLocales.includes(userLang)) {
+       redirect = `/${userLang}/`;
+    } else if (supportedLocales.includes(lang)) {
+       redirect = `/${lang}/`;
+    } else if (userLang.startsWith('zh')) {
+       redirect = userLang.includes('TW') || userLang.includes('HK') ? '/zh-TW/' : '/zh-CN/';
+    }
+    
+    window.location.replace(redirect);
+  </script>
+</head>
+<body style="background-color: #09090b; color: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <p>If you are not redirected automatically, follow this <a href="/en/" style="color: #3b82f6;">link to the English version</a>.</p>
+</body>
+</html>

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Expo & React Native
+.expo/
+.expo-shared/
+web-build/
+dist/
+build/
+
+# Turborepo
+.turbo/
+
+# Environment & Secrets
+.env
+.env*.local
+.env.production
+*.pem
+*.keystore
+*.jks
+*.p12
+*.pfx
+credentials.json
+release-signing.properties
+local.properties
+
+# Native build outputs
+*.apk
+*.aab
+*.ipa
+android/app/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# Local temporary scratch scripts & signing configs
+scratch/
+.env.signing
+*.env.signing

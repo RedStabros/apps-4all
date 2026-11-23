@@ -1,0 +1,159 @@
+---
+// AppCard.astro v3 — Premium card with account badge, 96px icon, manual link, and APK download
+interface Props {
+  name: string;
+  description: string;
+  apkUrl: string;
+  category: 'productivity' | 'utilities' | 'time-math';
+  emoji: string;
+  slug?: string;
+  lang?: string;
+  hasAccountOption?: boolean;
+  accountBadge?: string;
+  index?: number;
+  iconUrl?: string;
+}
+
+const {
+  name,
+  description,
+  apkUrl,
+  category,
+  emoji,
+  slug = '',
+  lang = 'es',
+  hasAccountOption = false,
+  accountBadge,
+  index = 0,
+  iconUrl,
+} = Astro.props;
+
+const categoryConfig = {
+  productivity: {
+    label: 'Productivity',
+    accent: 'blue',
+    bg:     'bg-blue-50 dark:bg-blue-950/30',
+    border: 'border-blue-200/60 dark:border-blue-800/40',
+    badge:  'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+    icon:   'bg-gradient-to-br from-blue-500 to-blue-700',
+    btn:    'bg-primary hover:bg-blue-700 dark:bg-primary-dark dark:hover:bg-blue-300',
+    btnText:'text-white dark:text-zinc-900',
+    glow:   'group-hover:shadow-blue-500/20',
+  },
+  utilities: {
+    label: 'Utilities',
+    accent: 'teal',
+    bg:     'bg-teal-50 dark:bg-teal-950/30',
+    border: 'border-teal-200/60 dark:border-teal-800/40',
+    badge:  'bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300',
+    icon:   'bg-gradient-to-br from-teal-500 to-teal-700',
+    btn:    'bg-teal-600 hover:bg-teal-700 dark:bg-teal-400 dark:hover:bg-teal-300',
+    btnText:'text-white dark:text-zinc-900',
+    glow:   'group-hover:shadow-teal-500/20',
+  },
+  'time-math': {
+    label: 'Time & Math',
+    accent: 'amber',
+    bg:     'bg-amber-50 dark:bg-amber-950/30',
+    border: 'border-amber-200/60 dark:border-amber-800/40',
+    badge:  'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300',
+    icon:   'bg-gradient-to-br from-amber-400 to-amber-600',
+    btn:    'bg-amber-600 hover:bg-amber-700 dark:bg-amber-400 dark:hover:bg-amber-300',
+    btnText:'text-white dark:text-zinc-900',
+    glow:   'group-hover:shadow-amber-500/20',
+  },
+};
+
+const cfg = categoryConfig[category];
+const delayClass = index < 5 ? `reveal-delay-${index + 1}` : '';
+const manualUrl = `/${lang}/apps/${slug}`;
+const isEs = lang === 'es';
+const manualLabel = isEs ? 'Manual y Funciones' : 'Manual & Features';
+const downloadLabel = isEs ? 'Descargar APK' : 'Download APK';
+---
+
+<article
+  class:list={[
+    'group reveal', delayClass,
+    'relative flex flex-col rounded-2xl border p-5 transition-all duration-300',
+    'bg-white dark:bg-zinc-900',
+    cfg.border,
+    'hover:-translate-y-1.5 hover:shadow-xl',
+    cfg.glow,
+  ]}
+  aria-label={name}
+>
+  <!-- Category and Account badges -->
+  <div class="flex items-center justify-between gap-1 mb-4">
+    <span class:list={['text-[11px] font-semibold px-2.5 py-0.5 rounded-full', cfg.badge]}>
+      {cfg.label}
+    </span>
+    <span
+      class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50"
+      title={isEs ? '100% Offline — Sin cuentas ni telemetría' : '100% Offline — No accounts, no telemetry'}
+    >
+      <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+      {isEs ? '100% Offline' : '100% Offline'}
+    </span>
+  </div>
+
+  <!-- App Icon -->
+  <div class="w-24 h-24 rounded-2xl flex items-center justify-center mb-4 relative">
+    {iconUrl ? (
+      <img
+        src={iconUrl}
+        alt={name}
+        class="w-24 h-24 rounded-2xl object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+      />
+    ) : (
+      <div class:list={['w-24 h-24 rounded-2xl flex items-center justify-center shadow-md', cfg.icon]}>
+        <span class="text-4xl leading-none select-none" role="img" aria-label={name}>{emoji}</span>
+      </div>
+    )}
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 mb-5">
+    <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-1.5 leading-snug">
+      <a href={manualUrl} class="hover:text-primary dark:hover:text-primary-dark transition-colors">
+        {name}
+      </a>
+    </h3>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{description}</p>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex flex-col gap-2 mt-auto">
+    <a
+      href={manualUrl}
+      class="inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-zinc-700 transition-all duration-200 active:scale-95"
+      id={`manual-${slug || name.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <svg class="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      {manualLabel} ➔
+    </a>
+
+    <a
+      href={apkUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[
+        'inline-flex items-center justify-center gap-2',
+        'w-full px-4 py-2.5 rounded-xl text-xs font-bold',
+        'transition-all duration-200 active:scale-95 shadow-sm',
+        cfg.btn, cfg.btnText,
+      ]}
+      id={`download-${slug || name.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      {downloadLabel}
+    </a>
+  </div>
+</article>

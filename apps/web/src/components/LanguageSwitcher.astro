@@ -1,0 +1,117 @@
+---
+// LanguageSwitcher.astro — Accessible dropdown for 17 language locales
+interface Props {
+  currentLang: string;
+}
+const { currentLang } = Astro.props;
+
+const languages = [
+  { code: 'en',    label: 'English',            flag: '🇺🇸' },
+  { code: 'es',    label: 'Español',            flag: '🇪🇸' },
+  { code: 'pt',    label: 'Português',          flag: '🇧🇷' },
+  { code: 'it',    label: 'Italiano',           flag: '🇮🇹' },
+  { code: 'tr',    label: 'Türkçe',             flag: '🇹🇷' },
+  { code: 'pl',    label: 'Polski',             flag: '🇵🇱' },
+  { code: 'fr',    label: 'Français',           flag: '🇫🇷' },
+  { code: 'de',    label: 'Deutsch',            flag: '🇩🇪' },
+  { code: 'ru',    label: 'Русский',            flag: '🇷🇺' },
+  { code: 'hi',    label: 'हिन्दी',              flag: '🇮🇳' },
+  { code: 'id',    label: 'Bahasa Indonesia',   flag: '🇮🇩' },
+  { code: 'zh-CN', label: '中文（简体）',         flag: '🇨🇳' },
+  { code: 'zh-TW', label: '中文（繁體）',         flag: '🇹🇼' },
+  { code: 'ko',    label: '한국어',              flag: '🇰🇷' },
+  { code: 'ja',    label: '日本語',              flag: '🇯🇵' },
+  { code: 'vi',    label: 'Tiếng Việt',         flag: '🇻🇳' },
+  { code: 'th',    label: 'ภาษาไทย',            flag: '🇹🇭' },
+  // Phase 2 LTR Languages
+  { code: 'bn',    label: 'বাংলা',               flag: '🇧🇩' },
+  { code: 'fil',   label: 'Filipino',           flag: '🇵🇭' },
+  { code: 'sw',    label: 'Kiswahili',          flag: '🇰🇪' },
+  { code: 'ha',    label: 'Hausa',              flag: '🇳🇬' },
+  { code: 'ms',    label: 'Bahasa Melayu',      flag: '🇲🇾' },
+  { code: 'uk',    label: 'Українська',         flag: '🇺🇦' },
+  { code: 'ta',    label: 'தமிழ்',               flag: '🇮🇳' },
+  { code: 'te',    label: 'తెలుగు',              flag: '🇮🇳' },
+  { code: 'mr',    label: 'मराठी',               flag: '🇮🇳' },
+];
+
+const current = languages.find(l => l.code === currentLang) ?? languages[0]!;
+---
+
+<div class="relative" id="lang-switcher-container">
+  <button
+    id="lang-switcher-btn"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-label="Select language"
+    class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
+  >
+    <span class="text-base leading-none">{current.flag}</span>
+    <span class="hidden sm:inline">{current.code.toUpperCase()}</span>
+    <svg class="w-3.5 h-3.5 transition-transform duration-200" id="lang-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  <!-- Dropdown -->
+  <ul
+    id="lang-dropdown"
+    role="listbox"
+    aria-label="Languages"
+    class="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl z-50 hidden overflow-y-auto overscroll-contain"
+    style="max-height: min(370px, calc(100vh - 80px));"
+  >
+    {languages.map(lang => (
+      <li role="option" aria-selected={lang.code === currentLang}>
+        <a
+          href={`/${lang.code}/`}
+          class:list={[
+            'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors',
+            lang.code === currentLang
+              ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-dark font-semibold'
+              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+          ]}
+        >
+          <span class="text-base">{lang.flag}</span>
+          <span>{lang.label}</span>
+          {lang.code === currentLang && (
+            <svg class="w-4 h-4 ml-auto text-primary dark:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const btn = document.getElementById('lang-switcher-btn');
+  const dropdown = document.getElementById('lang-dropdown');
+  const chevron = document.getElementById('lang-chevron');
+
+  function toggleDropdown(open: boolean) {
+    dropdown?.classList.toggle('hidden', !open);
+    btn?.setAttribute('aria-expanded', String(open));
+    chevron?.classList.toggle('rotate-180', open);
+  }
+
+  btn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !dropdown?.classList.contains('hidden');
+    toggleDropdown(!isOpen);
+  });
+
+  // Prevent page scroll when scrolling inside the dropdown
+  dropdown?.addEventListener('wheel', (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  // Close on outside click
+  document.addEventListener('click', () => toggleDropdown(false));
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleDropdown(false);
+  });
+</script>

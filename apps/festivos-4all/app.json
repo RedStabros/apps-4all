@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Festivos 4All",
+    "slug": "festivos-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.festivos",
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Festivos 4All necesita acceso para guardar los días festivos en tu calendario."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.festivos",
+      "permissions": [
+        "READ_CALENDAR",
+        "WRITE_CALENDAR"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "plugins": [
+      "expo-calendar"
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

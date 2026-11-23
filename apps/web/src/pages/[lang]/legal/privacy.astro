@@ -1,0 +1,243 @@
+---
+// privacy.astro — Política de Privacidad, Tratamiento Local-First y Transferencia de Datos en M&A
+import Layout from '../../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+  const locales = [
+    "en", "es", "pt", "it", "tr", "pl", "hi", "id", "ru", "fr", "de", "zh-CN", "zh-TW", "ko", "ja", "vi", "th",
+    "bn", "fil", "sw", "ha", "ms", "uk", "ta", "te", "mr"
+  ];
+  return locales.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+
+const translations = {
+  en: {
+    title: "Privacy & Transparency Policy",
+    subtitle: "Local-First data philosophy, zero covert tracking, device permission transparency, and asset transfer protocols.",
+    lastUpdated: "Last Updated: September 10, 2026",
+    backHome: "← Back to Home",
+    highlightBadge: "Privacy First & Zero Telemetry",
+    alertTitle: "Core Commitment: Your Data Belongs Exclusively to You",
+    alertDesc: "We believe privacy is a fundamental human right. The 4All Ecosystem is architected from the ground up on a 'Local-First' paradigm. We do not track, monetize, profile, or sell your personal data. Processing happens locally on your device hardware.",
+    sections: [
+      {
+        title: "1. Local-First Architecture and Zero Covert Tracking",
+        content: [
+          "Our software is engineered to minimize and eliminate external data transmission.",
+          "• No Hidden Telemetry: We do not integrate third-party analytics SDKs, advertising trackers, device fingerprinting, or behavioral profiling tools (such as Google Analytics, Firebase Analytics, or Meta Pixel).",
+          "• No Background Tracking: The applications execute tasks strictly when opened and do not maintain silent background location or network listeners."
+        ]
+      },
+      {
+        title: "2. Ecosystem Classification: Offline vs. Optional Cloud Sync",
+        content: [
+          "We clearly divide our 15 applications into two transparent technical categories:",
+          "• 100% Offline Applications (9 apps: Azar 4All, Docs 4All, Fotos Ligeras 4All, Lupa 4All, Medidas 4All, PDF 4All, QR 4All, Reproductor 4All, ZIP 4All): These apps have zero network connectivity requirements. All documents, images, audio files, calculations, and QR codes reside solely in your device's internal sandbox storage (SQLite/MMKV).",
+          "• Optional Cloud-Sync Applications (6 apps: Apuntes 4All, Cuentas 4All, Enfoque 4All, Festivos 4All, Notas de Voz 4All, Seguridad 4All): Cloud synchronization via our encrypted Supabase backend is strictly voluntary (opt-in). If you do not register an account, the app operates 100% offline locally. When an account is registered, synchronized data is isolated by user ID via Row Level Security (RLS) and encrypted in transit via TLS 1.3."
+        ]
+      },
+      {
+        title: "3. Transparent Device Permissions Usage (Just-In-Time)",
+        content: [
+          "Permissions requested on your mobile operating system are limited strictly to features you explicitly activate:",
+          "• Camera: Used solely for real-time QR scanning (QR 4All) and physical document digitization into PDF (PDF 4All). Video frames are processed in volatile RAM and are never recorded, transmitted, or stored externally.",
+          "• Microphone: Used solely when you press record in Notas de Voz 4All. Audio files are saved directly to your local file system.",
+          "• File Storage and Media Picker: The app only accesses specific files you select through the native OS file picker. It does not scan your external storage or photo gallery.",
+          "• Biometric Authentication (Face ID / Fingerprint): Handled exclusively by native hardware security enclaves (iOS Secure Enclave / Android KeyStore). The 4All apps never have access to, receive, or store raw biometric markers."
+        ]
+      },
+      {
+        title: "4. User Data in the Event of an Asset Sale or Corporate Acquisition (M&A)",
+        content: [
+          "In alignment with our Terms of Service and Software License, the Author reserves the right to sell or transfer individual applications or the complete ecosystem to a corporate acquirer or investment entity:",
+          "• For 100% Offline Applications: Because no user data, accounts, or telemetry exist on external servers, no user data can or will be transferred to an acquirer.",
+          "• For Optional Cloud-Sync Applications: In the event that an application with optional cloud accounts is acquired, user account credentials and encrypted database records associated solely with that application may be transferred to the legitimate acquirer to ensure uninterrupted service continuity.",
+          "• Prior Notice & Right to Deletion: Users shall be granted reasonable prior notice and retain the unconditional right to export their data and delete their cloud account permanently prior to or during the transition, preventing any data transfer to the new owner."
+        ]
+      },
+      {
+        title: "5. User Rights, Data Portability, and Right to Deletion (GDPR & CCPA)",
+        content: [
+          "Regardless of your geographical location, we uphold the highest international standards of privacy (including GDPR and CCPA principles):",
+          "• Right of Access and Portability: You may export your notes, records, spreadsheets, and data in standard open formats (JSON, CSV, PDF, TXT) at any time.",
+          "• Right to Deletion ('Right to be Forgotten'): In applications with cloud sync, you can delete your account and all associated remote records instantly from the in-app Settings menu.",
+          "• Local Data Deletion: Uninstalling any 100% offline app immediately and irreversibly deletes its internal sandbox data from your device."
+        ]
+      },
+      {
+        title: "6. Security Standards and Source Code Transparency",
+        content: [
+          "We implement industry-standard encryption protocols (TLS 1.3 for network requests and AES-256 for encrypted containers).",
+          "Furthermore, our source code is publicly accessible for technical auditing, allowing security researchers and users to verify that our privacy assertions match the actual executable code."
+        ]
+      }
+    ]
+  },
+  es: {
+    title: "Política de Privacidad y Transparencia",
+    subtitle: "Filosofía de datos Local-First, ausencia de telemetría oculta, permisos nativos transparentes y protocolo de transferencia en M&A.",
+    lastUpdated: "Última Actualización: 10 de Septiembre de 2026",
+    backHome: "← Volver al Inicio",
+    highlightBadge: "Privacidad Primero y Cero Telemetría",
+    alertTitle: "Compromiso Fundamental: Tus Datos te Pertenecen Exclusivamente a Ti",
+    alertDesc: "Creemos que la privacidad es un derecho humano inalienable. El Ecosistema 4All está diseñado íntegramente bajo la filosofía 'Local-First'. No rastreamos, no monetizamos, no perfilamos ni vendemos tus datos personales. El procesamiento técnico se realiza de forma local en el hardware de tu dispositivo.",
+    sections: [
+      {
+        title: "1. Arquitectura Local-First y Cero Rastreo Oculto",
+        content: [
+          "Nuestras aplicaciones han sido desarrolladas con el principio de mínima transmisión de datos:",
+          "• Sin Telemetría Oculta: No integramos SDKs de analítica de terceros, rastreadores publicitarios, huellas digitales de dispositivos ni herramientas de perfilamiento de usuarios (tales como Google Analytics, Firebase Analytics o Meta Pixel).",
+          "• Sin Rastreo en Segundo Plano: Las aplicaciones se ejecutan únicamente cuando el usuario las abre; no mantienen procesos ocultos de escucha de red ni geolocalización activa."
+        ]
+      },
+      {
+        title: "2. Clasificación del Ecosistema: Apps 100% Offline vs. Nube Opcional",
+        content: [
+          "Dividimos con absoluta transparencia nuestras 15 aplicaciones en dos categorías técnicas:",
+          "• Aplicaciones 100% Sin Cuenta / Offline (9 apps: Azar 4All, Docs 4All, Fotos Ligeras 4All, Lupa 4All, Medidas 4All, PDF 4All, QR 4All, Reproductor 4All, ZIP 4All): No requieren ni admiten conexión a internet para su funcionalidad nuclear. Todos los documentos, imágenes, audios, cálculos y códigos QR se guardan estrictamente en el almacenamiento aislado local de su dispositivo (SQLite/MMKV).",
+          "• Aplicaciones con Sincronización en la Nube Opcional (6 apps: Apuntes 4All, Cuentas 4All, Enfoque 4All, Festivos 4All, Notas de Voz 4All, Seguridad 4All): La sincronización con nuestra infraestructura en Supabase es estrictamente voluntaria (opt-in). Si el usuario no registra una cuenta, la aplicación funciona al 100% de manera local y offline. Al registrar una cuenta, los datos sincronizados quedan aislados mediante Row Level Security (RLS) y viajan cifrados bajo TLS 1.3."
+        ]
+      },
+      {
+        title: "3. Uso Transparente de Permisos Nativos (Just-In-Time)",
+        content: [
+          "Los permisos solicitados al sistema operativo móvil se limitan de manera estricta a las funciones que el usuario activa expresamente:",
+          "• Cámara: Se utiliza exclusivamente para el escaneo en tiempo real de códigos QR (QR 4All) y la digitalización física de documentos a PDF (PDF 4All). Los fotogramas se procesan en la memoria RAM volátil del dispositivo y jamás se transmiten a servidores externos.",
+          "• Micrófono: Se activa únicamente cuando el usuario presiona el botón de grabar en Notas de Voz 4All. Los archivos de audio se almacenan de forma local en el dispositivo.",
+          "• Almacenamiento y Selector de Archivos: La app únicamente accede a los archivos específicos que usted selecciona manualmente mediante el selector nativo del sistema operativo. No se inspecciona la galería ni el almacenamiento externo.",
+          "• Autenticación Biométrica (Face ID / Huella Dactilar): Es administrada directamente por los chips de seguridad del sistema operativo (Secure Enclave en iOS y Android KeyStore). Las aplicaciones de 4All jamás tienen acceso ni almacenan patrones biométricos."
+        ]
+      },
+      {
+        title: "4. Tratamiento de Datos en caso de Venta de Activos o Fusión Corporativa (M&A)",
+        content: [
+          "De conformidad con nuestros Términos y Condiciones y la Licencia de Software, el Autor conserva el derecho de vender o ceder aplicaciones individuales o el ecosistema completo a terceros adquirentes comerciales:",
+          "• En las 9 Aplicaciones 100% Offline: Al no existir datos ni registros de usuario en servidores remotos, no existe transferencia alguna de datos personales.",
+          "• En las 6 Aplicaciones con Sincronización Opcional: Si se vende una aplicación que disponga de sincronización en la nube, las cuentas y registros cifrados correspondientes exclusivamente a esa aplicación podrán transferirse al comprador legítimo para garantizar la continuidad del servicio.",
+          "• Notificación Previa y Derecho de Eliminación: Los usuarios contarán con aviso previo y conservarán en todo momento el derecho inalienable de exportar sus datos y eliminar su cuenta en la nube antes o durante la transición, evitando así que sus datos sean transferidos a la entidad adquirente."
+        ]
+      },
+      {
+        title: "5. Derechos del Usuario, Portabilidad y Eliminación Definitiva (GDPR y CCPA)",
+        content: [
+          "Independientemente de la ubicación geográfica del usuario, garantizamos los estándares más exigentes de privacidad internacional:",
+          "• Derecho de Acceso y Portabilidad: Puede exportar sus notas, registros, balances y archivos en formatos abiertos (JSON, CSV, PDF, TXT) en cualquier momento.",
+          "• Derecho al Olvido (Eliminación): En las aplicaciones con nube opcional, puede eliminar su cuenta y todos sus registros remotos de forma instantánea desde los ajustes de la aplicación.",
+          "• Eliminación Local: Al desinstalar cualquiera de las 9 aplicaciones 100% offline, todos los datos almacenados en el sandbox local del dispositivo se eliminan de manera inmediata e irreversible."
+        ]
+      },
+      {
+        title: "6. Estándares de Seguridad y Transparencia del Código Fuente",
+        content: [
+          "Aplicamos estrictos estándares de cifrado en reposo (AES-256) y en tránsito (TLS 1.3).",
+          "Asimismo, nuestro código fuente se encuentra a disposición pública para fines de auditoría técnica, lo que permite a la comunidad de desarrolladores y usuarios verificar de manera independiente que nuestras prácticas de privacidad se cumplen con total rigor en el código ejecutable."
+        ]
+      }
+    ]
+  },
+  pt: {
+    title: "Política de Privacidade e Transparência",
+    subtitle: "Filosofia Local-First, ausência de rastreadores ocultos, permissões transparentes e protocolo de M&A.",
+    lastUpdated: "Última Actualização: 10 de Setembro de 2026",
+    backHome: "← Voltar ao Início",
+    highlightBadge: "Privacidade Primeiro & Zero Telemetria",
+    alertTitle: "Compromisso Central: Os Seus Dados Pertencem-lhe Exclusivamente a Si",
+    alertDesc: "Acreditamos que a privacidade é um direito humano fundamental. O Ecossistema 4All é construído com base na arquitetura 'Local-First'. Não rastreamos, não monetizamos nem vendemos os seus dados pessoais.",
+    sections: [
+      {
+        title: "1. Arquitetura Local-First e Ausência de Rastreadores",
+        content: [
+          "Não utilizamos SDKs de análise de terceiros (como Google Analytics, Firebase ou Meta Pixel). O processamento ocorre localmente no seu dispositivo."
+        ]
+      },
+      {
+        title: "2. Classificação: 9 Apps 100% Offline vs. 6 Apps com Nuvem Opcional",
+        content: [
+          "• 9 Apps 100% Offline: Não requerem conta nem transmitem dados para a internet.",
+          "• 6 Apps com Nuvem Opcional: A sincronização via Supabase é estritamente opcional (opt-in)."
+        ]
+      },
+      {
+        title: "3. Tratamento de Dados em caso de Venda de Ativos (M&A)",
+        content: [
+          "Em caso de venda ou transferência de uma aplicação com contas na nuvem, o utilizador terá o direito prévio de exportar ou eliminar a sua conta permanentemente antes da transição."
+        ]
+      },
+      {
+        title: "4. Direitos do Utilizador e Eliminação de Dados (GDPR)",
+        content: [
+          "Os utilizadores podem exportar os seus dados ou eliminar a sua conta e dados na nuvem a qualquer momento com um único clique."
+        ]
+      }
+    ]
+  }
+};
+
+const t = translations[lang] || translations.en;
+---
+
+<Layout title={`${t.title} — 4All`} description={t.subtitle} lang={lang}>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-zinc-900 dark:text-zinc-100 transition-colors">
+    <!-- Navegación de retorno -->
+    <a
+      href={`/${lang}/`}
+      class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:underline mb-8"
+    >
+      {t.backHome}
+    </a>
+
+    <!-- Encabezado -->
+    <header class="mb-10">
+      <div class="inline-flex items-center gap-2 p-3 bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 rounded-2xl mb-5">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-wider">{t.highlightBadge}</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
+        {t.title}
+      </h1>
+      <p class="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 mb-3 leading-relaxed">
+        {t.subtitle}
+      </p>
+      <p class="text-xs font-semibold text-zinc-500 dark:text-zinc-500">
+        {t.lastUpdated}
+      </p>
+    </header>
+
+    <!-- Alerta destacado de Privacidad -->
+    <div class="p-6 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-950 dark:text-teal-200 mb-12">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl flex-shrink-0">🛡️</span>
+        <div>
+          <h2 class="text-base font-bold mb-1">{t.alertTitle}</h2>
+          <p class="text-sm leading-relaxed text-zinc-700 dark:text-teal-100/90">{t.alertDesc}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secciones de Privacidad Estructuradas -->
+    <div class="space-y-10">
+      {t.sections.map((section) => (
+        <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm">
+          <h2 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white mb-4">
+            {section.title}
+          </h2>
+          <div class="space-y-3 text-sm sm:text-base text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            {section.content.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- Pie de página de privacidad -->
+    <div class="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <p>Para Todos (4All) Ecosystem · Copyright © 2026. Todos los derechos reservados.</p>
+    </div>
+  </main>
+</Layout>

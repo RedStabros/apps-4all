@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Apuntes 4All",
+    "slug": "apuntes-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.apuntes4all",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usa Face ID para proteger y abrir tus carpetas privadas de notas de forma local.",
+        "NSPhotoLibraryUsageDescription": "Selecciona imágenes de tu galería para adjuntarlas localmente a tus notas."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.apuntes4all",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

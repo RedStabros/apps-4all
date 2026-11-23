@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-23T00:00:00Z",
+  "portalUrl": "https://apps-4all.pages.dev",
+  "releasesUrl": "https://github.com/RedStabros/apps-4all/releases/latest",
+  "apps": {
+    "apuntes-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/apuntes-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "azar-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/azar-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "cuentas-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/cuentas-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "docs-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/docs-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "enfoque-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/enfoque-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "festivos-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/festivos-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "fotos-ligeras-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/fotos-ligeras-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "lupa-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/lupa-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "medidas-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/medidas-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "notas-voz-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/notas-voz-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "pdf-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/pdf-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "qr-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/qr-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "reproductor-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/reproductor-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "seguridad-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/seguridad-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    },
+    "zip-4all": {
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/zip-4all-v1.0.0.apk",
+      "sha256": "pending-release-build"
+    }
+  }
+}
+

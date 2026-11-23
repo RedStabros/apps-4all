@@ -1,0 +1,266 @@
+---
+// terms.astro — Términos y Condiciones de Uso, Deslinde de Responsabilidad y Cláusula de Venta Futura (M&A)
+import Layout from '../../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+  const locales = [
+    "en", "es", "pt", "it", "tr", "pl", "hi", "id", "ru", "fr", "de", "zh-CN", "zh-TW", "ko", "ja", "vi", "th",
+    "bn", "fil", "sw", "ha", "ms", "uk", "ta", "te", "mr"
+  ];
+  return locales.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+
+const translations = {
+  en: {
+    title: "Terms and Conditions of Service",
+    subtitle: "Terms of use, user responsibilities, disclaimer of warranties, and corporate asset transfer provisions.",
+    lastUpdated: "Last Updated: September 10, 2026",
+    backHome: "← Back to Home",
+    highlightBadge: "Terms of Use & Legal Framework",
+    alertTitle: "Governing Standard: PolyForm Noncommercial 1.0.0 & Local-First",
+    alertDesc: "By accessing, downloading, installing, or using any application within the 4All Ecosystem or this web portal, you agree to be bound by these Terms and Conditions and our License. If you do not agree, do not install or use the applications.",
+    sections: [
+      {
+        title: "1. Acceptance of Terms and Noncommercial License",
+        content: [
+          "These Terms and Conditions constitute a legally binding agreement between you (the user) and the Original Author and Creator of the 4All Ecosystem ('Para Todos').",
+          "All 15 applications and web services are made available for personal, educational, and noncommercial evaluation under the PolyForm Noncommercial License 1.0.0. Any commercial exploitation, resale, bundling, or unauthorized redistribution by third parties without prior express written authorization is strictly prohibited."
+        ]
+      },
+      {
+        title: "2. Intellectual Property and Proprietary Rights",
+        content: [
+          "All software architectures, native C++ audio/video DSP pipelines, cryptographic routines, user interface layouts, origami visual identities, branding ('4All', 'Para Todos'), logos, domain names, and source code remain the exclusive intellectual property of the Original Author.",
+          "Nothing in these Terms grants or transfers to users or third parties any title, patent, commercial copyright, or proprietary rights beyond the revocable, non-exclusive, noncommercial license granted herein."
+        ]
+      },
+      {
+        title: "3. Express Reservation of Rights for Asset Sale, Exit, and Corporate Transfer (M&A)",
+        content: [
+          "The Original Author exclusively reserves the full, unrestricted legal authority to sell, assign, transfer, license, or convey any individual application (such as QR 4All, Reproductor 4All, Apuntes 4All, etc.) or the ecosystem in its entirety to third-party commercial purchasers, corporate acquirers, or investment entities via an Asset Purchase Agreement (APA), merger, or acquisition.",
+          "In the event of an asset sale or transfer of any specific application:",
+          "• The acquiring entity shall receive unencumbered commercial ownership and may modify, update, rebrand, relicense, or commercialize the acquired application under proprietary terms.",
+          "• Users acknowledge that no perpetual commercial rights or guarantees of future free cloud features are created by past free usage.",
+          "• Each application operates as a decoupled, independent software asset; the sale or transfer of an individual app shall not affect the operation, licensing, or ownership of the remaining applications in the monorepo."
+        ]
+      },
+      {
+        title: "4. Architecture: 100% Offline Apps vs. Optional Cloud Sync",
+        content: [
+          "The 4All ecosystem is architected with a strict Local-First design:",
+          "• Offline-Only Applications (9 apps: Azar 4All, Docs 4All, Fotos Ligeras 4All, Lupa 4All, Medidas 4All, PDF 4All, QR 4All, Reproductor 4All, ZIP 4All): These applications function completely offline without accounts, logins, or remote communication. All processing is executed solely on your device CPU.",
+          "• Optional Cloud-Sync Applications (6 apps: Apuntes 4All, Cuentas 4All, Enfoque 4All, Festivos 4All, Notas de Voz 4All, Seguridad 4All): Cloud synchronization via Supabase is strictly opt-in. Users may use these applications 100% offline without creating an account. If an account is registered, synchronization is encrypted and governed by our Privacy Policy."
+        ]
+      },
+      {
+        title: "5. User Responsibility for Local Data and Backups",
+        content: [
+          "Because 4All applications are Local-First and do not track or hold master copies of your personal data on remote servers by default, you (the user) are solely responsible for:",
+          "• Maintaining regular backups of your local files, notes, audio recordings, documents, and exported archives.",
+          "• Safeguarding your device credentials, biometric keys, and master passwords (specifically in Seguridad 4All). If you lose access to your local encryption key, your data cannot be recovered by the author.",
+          "• Ensuring that your device hardware and operating system have adequate storage and security safeguards."
+        ]
+      },
+      {
+        title: "6. Disclaimer of Warranties ('AS-IS') and Limitation of Liability",
+        content: [
+          "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE 4ALL APPLICATIONS, SERVICES, AND SOURCE CODE ARE PROVIDED ON AN 'AS IS' AND 'AS AVAILABLE' BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR UNINTERRUPTED AVAILABILITY.",
+          "IN NO EVENT SHALL THE ORIGINAL AUTHOR, CONTRIBUTORS, OR FUTURE LEGITIMATE ASSIGNEES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF DATA, LOSS OF PROFITS, DEVICE MALFUNCTION, SYSTEM CRASHES, OR BUSINESS INTERRUPTION ARISING OUT OF OR IN CONNECTION WITH THE USE OR INABILITY TO USE THE APPLICATIONS."
+        ]
+      },
+      {
+        title: "7. Modifications, Discontinuation, and Termination",
+        content: [
+          "The Author reserves the right to update, modify, enhance, or discontinue any feature, application, or support at any time without prior notice.",
+          "Your right to use the applications under the PolyForm Noncommercial License 1.0.0 shall automatically terminate without notice if you fail to comply with any term herein (including the commercial restriction)."
+        ]
+      },
+      {
+        title: "8. Governing Law and Severability",
+        content: [
+          "These Terms are governed by and construed in accordance with generally recognized principles of international intellectual property law and applicable civil codes.",
+          "If any provision of these Terms is found to be invalid or unenforceable, such provision shall be severed, and the remaining provisions shall continue in full force and effect."
+        ]
+      }
+    ]
+  },
+  es: {
+    title: "Términos y Condiciones de Uso",
+    subtitle: "Condiciones de uso, responsabilidades del usuario, exclusión de garantías y estipulaciones de transferencia de activos comerciales.",
+    lastUpdated: "Última Actualización: 10 de Septiembre de 2026",
+    backHome: "← Volver al Inicio",
+    highlightBadge: "Términos de Servicio y Marco Legal",
+    alertTitle: "Estándar Rector: PolyForm Noncommercial 1.0.0 y Local-First",
+    alertDesc: "Al acceder, descargar, instalar o utilizar cualquier aplicación del Ecosistema 4All o este portal web, usted acepta quedar vinculado legalmente por estos Términos y Condiciones y nuestra Licencia de Software. Si no está de acuerdo, le solicitamos no instalar ni utilizar las aplicaciones.",
+    sections: [
+      {
+        title: "1. Aceptación de los Términos y Marco de Licencia",
+        content: [
+          "Los presentes Términos y Condiciones constituyen un contrato jurídicamente vinculante entre el usuario y el Autor y Creador Original del Ecosistema 4All ('Para Todos').",
+          "Las 15 aplicaciones y servicios web se ofrecen de forma libre y gratuita para uso personal, educativo y de auditoría técnica bajo la licencia PolyForm Noncommercial License 1.0.0. Queda terminantemente prohibida cualquier explotación comercial, reventa, sublicenciamiento o distribución no autorizada con fines de lucro por parte de terceros sin el consentimiento expreso y por escrito del autor."
+        ]
+      },
+      {
+        title: "2. Propiedad Intelectual y Titularidad Exclusiva",
+        content: [
+          "Todas las arquitecturas de software, canalizaciones nativas DSP de audio y video en C++, esquemas criptográficos, interfaces gráficas, identidades visuales estilo origami, marcas denominativas ('4All', 'Para Todos'), logotipos, nombres de dominio y código fuente son y permanecerán bajo la propiedad intelectual única y exclusiva del Autor Original.",
+          "Ninguna disposición en estos Términos confiere ni transfiere a los usuarios ni a terceros ningún título, patente, derecho de explotación comercial ni titularidad sobre el software, más allá de la licencia no exclusiva, no comercial y revocable aquí establecida."
+        ]
+      },
+      {
+        title: "3. Reserva Expresa de Derechos para Venta de Activos, Fusión y Traspaso Corporativo (M&A / Exit)",
+        content: [
+          "El Autor Original conserva de manera exclusiva, irrestricta e incondicional la potestad jurídica de vender, ceder, transferir, licenciar comercialmente o traspasar la titularidad de cualquiera de las aplicaciones individuales (tales como QR 4All, Reproductor 4All, Apuntes 4All, etc.) o del ecosistema completo a terceros adquirentes comerciales, empresas o fondos de inversión mediante contratos de compraventa de activos (Asset Purchase Agreement - APA), fusiones o adquisiciones.",
+          "En caso de formalizarse una venta o traspaso de activos de cualquier aplicación:",
+          "• La entidad adquirente legítima recibirá la propiedad comercial libre de gravámenes virales copyleft y podrá modificar, actualizar, cambiar de marca, relicenciar de forma propietaria o comercializar la aplicación adquirida conforme a sus legítimos intereses comerciales.",
+          "• El usuario reconoce expresamente que el uso gratuito previo no genera derechos comerciales adquiridos ni la obligación de mantener servicios de nube perpetuos e inalterables en el futuro.",
+          "• Cada aplicación funciona como un activo de software desacoplado e independiente; la venta o transferencia de una app individual no afectará la titularidad, licenciamiento ni disponibilidad de las restantes aplicaciones del ecosistema."
+        ]
+      },
+      {
+        title: "4. Arquitectura Dual: Apps 100% Offline vs. Sincronización Nube Opcional",
+        content: [
+          "El ecosistema 4All está concebido bajo una arquitectura técnica estrictamente Local-First:",
+          "• Aplicaciones 100% Sin Cuenta / Offline (9 apps: Azar 4All, Docs 4All, Fotos Ligeras 4All, Lupa 4All, Medidas 4All, PDF 4All, QR 4All, Reproductor 4All, ZIP 4All): Operan de forma totalmente aislada en el dispositivo. No requieren registros, cuentas ni acceso a internet para su operatividad esencial. El procesamiento se ejecuta en la CPU del dispositivo del usuario.",
+          "• Aplicaciones con Sincronización en la Nube Opcional (6 apps: Apuntes 4All, Cuentas 4All, Enfoque 4All, Festivos 4All, Notas de Voz 4All, Seguridad 4All): La sincronización con la nube a través de Supabase es estrictamente voluntaria (opt-in). Si el usuario decide no registrar una cuenta, la app opera al 100% de manera local y offline sin transmitir ningún dato al exterior."
+        ]
+      },
+      {
+        title: "5. Responsabilidad del Usuario sobre sus Datos y Copias de Seguridad",
+        content: [
+          "Dado que las aplicaciones 4All son de naturaleza Local-First y no mantienen copias maestras de sus datos en servidores remotos por defecto, usted (el usuario) asume la responsabilidad exclusiva de:",
+          "• Mantener copias de seguridad periódicas de sus archivos locales, notas, grabaciones de voz, documentos de cálculo y archivos ZIP exportados.",
+          "• Custodiar sus credenciales de acceso, contraseñas maestras y claves biométricas (especialmente en Seguridad 4All). Si olvida o extravía su clave de cifrado local, los datos resultan técnicamente irrecuperables por parte del autor.",
+          "• Mantener la seguridad física y lógica de su dispositivo móvil."
+        ]
+      },
+      {
+        title: "6. Exclusión de Garantías ('Tal Cual' / AS-IS) y Limitación de Responsabilidad",
+        content: [
+          "EN LA MEDIDA MÁXIMA PERMITIDA POR LA LEGISLACIÓN APLICABLE, EL SOFTWARE, LAS APLICACIONES Y EL CÓDIGO FUENTE DE 4ALL SE PROPORCIONAN 'TAL CUAL' (AS-IS) Y 'SEGÚN DISPONIBILIDAD', SIN GARANTÍAS DE NINGÚN TIPO, YA SEAN EXPRESAS, IMPLÍCITAS, LEGALES O DE OTRO TIPO, INCLUYENDO PERO SIN LIMITARSE A GARANTÍAS DE COMERCIABILIDAD, ADECUACIÓN A UN PROPÓSITO PARTICULAR O AUSENCIA DE ERRORES.",
+          "EN NINGÚN CASO EL AUTOR ORIGINAL, COLABORADORES O FUTUROS CESIONARIOS SERÁN RESPONSABLES POR DAÑOS DIRECTOS, INDIRECTOS, INCIDENTALES, ESPECIALES, CONSECUENTES O PUNITIVOS, INCLUYENDO PÉRDIDA DE DATOS, PÉRDIDA DE BENEFICIOS, FALLOS DE DISPOSITIVOS O INTERRUPCIÓN DEL NEGOCIO DERIVADOS DEL USO O IMPOSIBILIDAD DE USO DEL SOFTWARE."
+        ]
+      },
+      {
+        title: "7. Modificaciones, Descontinuación y Terminación",
+        content: [
+          "El Autor se reserva el derecho de actualizar, modificar, sustituir o descontinuar temporal o permanentemente cualquier funcionalidad o aplicación en cualquier momento sin previo aviso.",
+          "Cualquier infracción a estos Términos o a las restricciones comerciales de la PolyForm Noncommercial License 1.0.0 provocará la rescisión automática e inmediata de la licencia concedida al infractor."
+        ]
+      },
+      {
+        title: "8. Ley Aplicable y Validez Separable",
+        content: [
+          "Estos Términos se rigen e interpretan de conformidad con los principios generales del derecho internacional de la propiedad intelectual y la legislación civil aplicable.",
+          "Si cualquier disposición de estos Términos fuese declarada nula o inaplicable por un tribunal competente, dicha cláusula se considerará separable sin afectar la validez y plena vigencia de las cláusulas restantes."
+        ]
+      }
+    ]
+  },
+  pt: {
+    title: "Termos e Condições de Uso",
+    subtitle: "Condições de utilização, responsabilidades do usuário, isenção de garantias e disposições para transferência de ativos.",
+    lastUpdated: "Última Actualização: 10 de Setembro de 2026",
+    backHome: "← Voltar ao Início",
+    highlightBadge: "Termos de Serviço e Quadro Jurídico",
+    alertTitle: "Padrão Regente: PolyForm Noncommercial 1.0.0 & Local-First",
+    alertDesc: "Ao aceder, descarregar, instalar ou utilizar qualquer aplicativo do Ecossistema 4All, concorda em ficar vinculado a estes Termos e Condições e à nossa Licença. Se não concordar, não instale nem utilize as aplicações.",
+    sections: [
+      {
+        title: "1. Aceitação dos Termos e Licença Não Comercial",
+        content: [
+          "Estes Termos constituem um acordo vinculativo entre o utilizador e o Autor e Criador Original do Ecossistema 4All.",
+          "As 15 aplicações são disponibilizadas gratuitamente para uso pessoal e educativo sob a licença PolyForm Noncommercial License 1.0.0. É estritamente proibida qualquer exploração comercial por terceiros sem autorização prévia por escrito."
+        ]
+      },
+      {
+        title: "2. Propriedade Intelectual",
+        content: [
+          "Todas as arquiteturas de software, algoritmos DSP em C++, interfaces e marcas ('4All', 'Para Todos') são de propriedade exclusiva do Autor Original."
+        ]
+      },
+      {
+        title: "3. Reserva de Direitos para Venda de Ativos e M&A",
+        content: [
+          "O Autor Original reserva-se o direito exclusivo de vender, transferir ou ceder a titularidade de qualquer aplicação individualmente ou de todo o ecossistema a investidores ou adquirentes comerciais através de contratos de compra de ativos (APA).",
+          "O adquirente legítimo terá plenos direitos de exploração comercial, não estando sujeito a restrições copyleft virais."
+        ]
+      },
+      {
+        title: "4. Arquitetura Local-First e Isenção de Garantias",
+        content: [
+          "As aplicações são fornecidas 'no estado em que se encontram' (AS-IS). O utilizador é o único responsável pelos backups locais dos seus ficheiros e chaves de segurança."
+        ]
+      }
+    ]
+  }
+};
+
+const t = translations[lang] || translations.en;
+---
+
+<Layout title={`${t.title} — 4All`} description={t.subtitle} lang={lang}>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-zinc-900 dark:text-zinc-100 transition-colors">
+    <!-- Navegación de retorno -->
+    <a
+      href={`/${lang}/`}
+      class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-primary-dark hover:underline mb-8"
+    >
+      {t.backHome}
+    </a>
+
+    <!-- Encabezado -->
+    <header class="mb-10">
+      <div class="inline-flex items-center gap-2 p-3 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-2xl mb-5">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-wider">{t.highlightBadge}</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
+        {t.title}
+      </h1>
+      <p class="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 mb-3 leading-relaxed">
+        {t.subtitle}
+      </p>
+      <p class="text-xs font-semibold text-zinc-500 dark:text-zinc-500">
+        {t.lastUpdated}
+      </p>
+    </header>
+
+    <!-- Alerta destacado de PolyForm & Local-First -->
+    <div class="p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-950 dark:text-blue-200 mb-12">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl flex-shrink-0">📜</span>
+        <div>
+          <h2 class="text-base font-bold mb-1">{t.alertTitle}</h2>
+          <p class="text-sm leading-relaxed text-zinc-700 dark:text-blue-100/90">{t.alertDesc}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secciones de Términos Estructuradas -->
+    <div class="space-y-10">
+      {t.sections.map((section) => (
+        <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm">
+          <h2 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white mb-4">
+            {section.title}
+          </h2>
+          <div class="space-y-3 text-sm sm:text-base text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            {section.content.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- Pie de página de términos -->
+    <div class="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <p>Para Todos (4All) Ecosystem · Copyright © 2026. Todos los derechos reservados.</p>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Fotos Ligeras 4All",
+    "slug": "fotos-ligeras-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.fotosligeras4all",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Accede a tu galería para seleccionar las fotos que deseas comprimir localmente.",
+        "NSPhotoLibraryAddUsageDescription": "Guarda las fotos comprimidas en tu álbum \"Fotos Ligeras\" de la galería."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.fotosligeras4all",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Fotos Ligeras 4All to access your photos."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Fotos Ligeras 4All to save photos to your gallery.",
+          "savePhotosPermission": "Allow Fotos Ligeras 4All to save photos to your gallery."
+        }
+      ]
+    ],
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

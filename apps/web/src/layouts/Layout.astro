@@ -1,0 +1,258 @@
+---
+import ThemeToggle from '../components/ThemeToggle.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+}
+
+const { title, description = 'A collection of 100% offline, privacy-first utility apps accessible to everyone.', lang = 'en' } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:title"       content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale"      content={lang} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{title}</title>
+
+    <!--
+      Theme Controller & Anti-flicker:
+      INLINE in <head> so it executes before paint.
+      Sets up window.__toggleTheme and applies saved or preferred theme.
+    -->
+    <script is:inline>
+      (function() {
+        window.__applyTheme = function(theme) {
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          var btn = document.getElementById('theme-toggle');
+          if (btn) {
+            btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+          }
+        };
+
+        window.__toggleTheme = function() {
+          var isDark = document.documentElement.classList.contains('dark');
+          var next = isDark ? 'light' : 'dark';
+          try {
+            localStorage.setItem('theme', next);
+          } catch(e) {}
+          window.__applyTheme(next);
+        };
+
+
+
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var initial = saved ? saved : (prefersDark ? 'dark' : 'light');
+          window.__applyTheme(initial);
+        } catch(e) {
+          window.__applyTheme('dark');
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+
+    <!-- ===== NAVBAR ===== -->
+    <header id="site-navbar" class="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 shadow-sm transition-colors duration-300">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center justify-between h-16" aria-label="Main navigation">
+          <!-- Logo -->
+          <a href={`/${lang}/`} class="flex items-center gap-2.5 group" aria-label="4All Home">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+              </svg>
+            </div>
+            <span class="font-bold text-zinc-900 dark:text-white text-base tracking-tight">
+              4<span class="text-primary dark:text-primary-dark">All</span>
+            </span>
+          </a>
+
+          <!-- Right side controls -->
+          <div class="flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageSwitcher currentLang={lang} />
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="flex-grow pt-16">
+      <slot />
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 mt-20 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <!-- Brand -->
+          <div class="flex flex-col items-center md:items-start gap-2">
+            <a href={`/${lang}/`} class="flex items-center gap-2 group">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                </svg>
+              </div>
+              <span class="font-bold text-zinc-900 dark:text-white text-sm">4All Ecosystem</span>
+            </a>
+            <p class="text-xs text-zinc-500 dark:text-zinc-500">15 Apps · 26 Languages · 100% Offline</p>
+          </div>
+
+          <!-- Stats badges -->
+          <div class="flex items-center gap-3 flex-wrap justify-center">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/50 text-primary dark:text-primary-dark text-xs font-medium rounded-full">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              PolyForm Noncommercial
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-400 text-xs font-medium rounded-full">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              Zero Telemetry · 100% Offline
+            </span>
+          </div>
+
+          <!-- Legal links -->
+          <div class="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-500">
+            <a href={`/${lang}/legal/terms`}    class="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Terms</a>
+            <a href={`/${lang}/legal/privacy`}  class="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Privacy</a>
+            <a href={`/${lang}/legal/license`}  class="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">License</a>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800/60 text-center text-xs text-zinc-400 dark:text-zinc-500 space-y-1">
+          <p>© 2026 Mauricio Saldarriaga · Para Todos (4All). Noncommercial, privacy-respecting software.</p>
+          <p>
+            {lang === 'es' ? 'Hecho con amor por ' : 'Made with love by '}
+            <a
+              href="https://mauricio-portfolio-z11.pages.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-semibold text-zinc-700 dark:text-zinc-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
+            >
+              RedStabros
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scroll-reveal: Intersection Observer for .reveal elements -->
+    <script is:inline>
+      (function() {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(function(el) {
+          observer.observe(el);
+        });
+      })();
+    </script>
+
+    <style is:global>
+      /* Reveal animation base state */
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .reveal.revealed {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* Stagger delays for grids */
+      .reveal-delay-1 { transition-delay: 0.1s; }
+      .reveal-delay-2 { transition-delay: 0.2s; }
+      .reveal-delay-3 { transition-delay: 0.3s; }
+      .reveal-delay-4 { transition-delay: 0.4s; }
+      .reveal-delay-5 { transition-delay: 0.5s; }
+
+      /* Smooth scrolling */
+      html { scroll-behavior: smooth; }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 9999px; }
+      ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+      /* Aurora background gradient keyframes */
+      @keyframes aurora {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .aurora-bg {
+        background: linear-gradient(-45deg,
+          #f8fafc,
+          #f0fdfa,
+          #eff6ff,
+          #faf5ff,
+          #f8fafc
+        );
+        background-size: 400% 400%;
+        animation: aurora 16s ease infinite;
+      }
+
+      :root.dark .aurora-bg,
+      .dark .aurora-bg {
+        background: linear-gradient(-45deg,
+          #09090b,
+          #0f172a,
+          #042f2e,
+          #09090b,
+          #1e1b4b
+        );
+        background-size: 400% 400%;
+        animation: aurora 12s ease infinite;
+      }
+
+      /* Dot grid pattern overlay */
+      .dot-pattern {
+        background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+      :root.dark .dot-pattern,
+      .dark .dot-pattern {
+        background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Category: Time & Calculation (Amber) */
+    --color-accent-light: #B45309; /* amber-700 */
+    --color-accent-dark: #FBBF24;  /* amber-400 */
+  }
+}

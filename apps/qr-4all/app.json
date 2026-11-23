@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "QR 4All",
+    "slug": "qr-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.qr",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Usa la cámara para escanear códigos QR en tiempo real de forma 100% offline.",
+        "NSPhotoLibraryUsageDescription": "Selecciona imágenes de tu galería para escanear códigos QR o añadir tu logo.",
+        "NSPhotoLibraryAddUsageDescription": "Guarda los códigos QR generados como imagen PNG en tu galería."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.qr",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow QR 4All to access your camera to scan codes."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow QR 4All to save generated QR codes to your photos.",
+          "savePhotosPermission": "Allow QR 4All to save generated QR codes to your photos."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow QR 4All to choose photos to scan QR codes."
+        }
+      ]
+    ],
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4All — Sistema de Identidad Cromática</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    /* ZINC BASE — LIGHT */
+    --l-bg:      #FAFAFA;
+    --l-surface: #FFFFFF;
+    --l-surface2:#F4F4F5;
+    --l-border:  #E4E4E7;
+    --l-text:    #18181B;
+    --l-text2:   #71717A;
+
+    /* ZINC BASE — DARK */
+    --d-bg:      #09090B;
+    --d-surface: #18181B;
+    --d-surface2:#27272A;
+    --d-border:  #3F3F46;
+    --d-text:    #FAFAFA;
+    --d-text2:   #A1A1AA;
+
+    /* ACCENTS */
+    --blue-l:  #2563EB;
+    --blue-d:  #60A5FA;
+    --teal-l:  #0F766E;
+    --teal-d:  #2DD4BF;
+    --amber-l: #B45309;
+    --amber-d: #FBBF24;
+
+    --danger-l:#DC2626;
+    --danger-d:#F87171;
+
+    font-family: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    background: var(--l-bg);
+    color: var(--l-text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono { font-family:'IBM Plex Mono', monospace; }
+  .display { font-family:'Space Grotesk', sans-serif; }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding: 96px 8vw 72px;
+    background: var(--l-bg);
+    border-bottom: 1px solid var(--l-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--l-text2);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow .dot-row{ display:flex; gap:6px; }
+  .hero-eyebrow .dot{ width:8px; height:8px; border-radius:2px; }
+  .hero h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(40px, 6vw, 76px);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+  }
+  .hero .sub{
+    margin-top: 24px;
+    font-size: 18px;
+    color: var(--l-text2);
+    max-width: 46ch;
+  }
+  .hero-numeral{
+    position:absolute;
+    right: 4vw; top: 40px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 220px;
+    color: var(--l-surface2);
+    line-height:1;
+    z-index:0;
+    user-select:none;
+  }
+  .hero-meta{
+    margin-top: 48px;
+    display:flex; gap:40px; flex-wrap:wrap;
+  }
+  .hero-meta div{ font-size:13px; }
+  .hero-meta .k{ color:var(--l-text2); font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;}
+  .hero-meta .v{ font-weight:600; }
+
+  section{ padding: 64px 8vw; border-bottom: 1px solid var(--l-border); }
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom: 40px; gap: 24px; flex-wrap: wrap;
+  }
+  .section-head .idx{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px; color:var(--l-text2);
+    letter-spacing:.1em;
+  }
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size: 32px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-top:6px;
+  }
+  .section-head p{ color:var(--l-text2); max-width:42ch; font-size:14px; }
+
+  /* ===== TOGGLE ===== */
+  .mode-toggle{
+    display:inline-flex;
+    border:1px solid var(--l-border);
+    border-radius: 8px;
+    overflow:hidden;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+  }
+  .mode-toggle button{
+    border:none; background:var(--l-surface); color:var(--l-text2);
+    padding:9px 18px; cursor:pointer; letter-spacing:.05em;
+    transition: all .15s ease;
+  }
+  .mode-toggle button.active{ background:var(--l-text); color:var(--l-bg); }
+
+  /* ===== BASE SCALE ===== */
+  .base-grid{ display:grid; grid-template-columns: repeat(6, 1fr); gap:1px; background:var(--l-border); border:1px solid var(--l-border); border-radius:12px; overflow:hidden; }
+  .swatch{ background:var(--l-surface); padding:20px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:flex-end; gap:4px; }
+  .swatch .box{ width:100%; height:52px; border-radius:6px; margin-bottom:14px; border:1px solid var(--l-border); }
+  .swatch .name{ font-size:12px; font-weight:600; }
+  .swatch .hex{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--l-text2); }
+  .swatch .use{ font-size:11px; color:var(--l-text2); margin-top:2px; }
+
+  /* ===== ACCENT CARDS ===== */
+  .accent-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
+  .accent-card{
+    border:1px solid var(--l-border); border-radius: 14px; overflow:hidden;
+    background: var(--l-surface);
+  }
+  .accent-top{ padding: 28px 24px 24px; }
+  .accent-cat{ font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--l-text2); margin-bottom:10px; }
+  .accent-name{ font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:600; margin-bottom:6px; }
+  .accent-apps{ font-size:13px; color:var(--l-text2); }
+  .accent-swatches{ display:grid; grid-template-columns: 1fr 1fr; }
+  .accent-sw{ padding:20px 24px; }
+  .accent-sw .lab{ font-size:10px; text-transform:uppercase; letter-spacing:.08em; font-family:'IBM Plex Mono',monospace; margin-bottom:10px; }
+  .accent-sw .chip{ width:100%; height:64px; border-radius:8px; margin-bottom:10px; display:flex; align-items:flex-end; padding:8px; }
+  .accent-sw .hexlabel{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; }
+  .accent-sw .contrast{ font-size:11px; margin-top:2px; }
+  .accent-sw.on-light{ background:#fff; border-top:1px solid var(--l-border); }
+  .accent-sw.on-dark{ background:#0d0d0f; border-top:1px solid var(--l-border); }
+  .accent-sw.on-dark .lab, .accent-sw.on-dark .hexlabel{ color:#fff; }
+  .accent-sw.on-dark .contrast{ color:#A1A1AA; }
+  .accent-sw.on-light .contrast{ color:#71717A; }
+  .pass-badge{ display:inline-block; font-size:10px; font-family:'IBM Plex Mono',monospace; padding:2px 6px; border-radius:4px; background:#DCFCE7; color:#166534; margin-left:6px; }
+
+  /* ===== PREVIEW MOCKUPS ===== */
+  .preview-wrap{ display:grid; grid-template-columns: repeat(3,1fr); gap:20px; }
+  .phone{
+    border-radius: 20px; border:1px solid var(--l-border);
+    padding: 24px 20px; min-height: 320px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .phone.light{ background:#fff; }
+  .phone.dark{ background:#000; }
+  .app-icon{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:16px; margin-bottom:8px; }
+  .phone-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; }
+  .phone.dark .phone-title{ color:#fff; }
+  .phone-sub{ font-size:12px; }
+  .phone.light .phone-sub{ color:#71717A; }
+  .phone.dark .phone-sub{ color:#A1A1AA; }
+  .btn-primary{
+    padding: 12px 18px; border-radius:10px; color:#fff; font-size:13px; font-weight:600;
+    text-align:center; margin-top:auto; font-family:'Inter',sans-serif;
+  }
+  .card-row{ display:flex; gap:8px; }
+  .pill{ font-size:10px; padding:4px 9px; border-radius:20px; font-family:'IBM Plex Mono',monospace; }
+
+  /* ===== TABLE / TOKENS ===== */
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--l-text2); padding:10px 14px; border-bottom:1px solid var(--l-border); }
+  td{ padding:12px 14px; border-bottom:1px solid var(--l-border); }
+  td.hexcell{ font-family:'IBM Plex Mono',monospace; }
+  .swatch-dot{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:middle; margin-right:8px; border:1px solid rgba(0,0,0,.08); }
+
+  footer{ padding: 40px 8vw; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  footer .mono{ font-size:11px; color:var(--l-text2); }
+
+  @media (max-width: 900px){
+    .base-grid{ grid-template-columns: repeat(3,1fr); }
+    .accent-grid{ grid-template-columns: 1fr; }
+    .preview-wrap{ grid-template-columns: 1fr; }
+    .hero-numeral{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-numeral">14</div>
+  <div class="hero-eyebrow">
+    <span class="dot-row">
+      <span class="dot" style="background:#2563EB"></span>
+      <span class="dot" style="background:#0F766E"></span>
+      <span class="dot" style="background:#B45309"></span>
+    </span>
+    Sistema de diseño · v1.0
+  </div>
+  <h1>4All — Identidad<br>cromática</h1>
+  <p class="sub">Una base neutra y constante para 14 utilidades offline-first, con tres acentos categóricos que distinguen sin decorar. Sobrio, corporativo, accesible.</p>
+  <div class="hero-meta">
+    <div><div class="k mono">Base</div><div class="v">Zinc scale</div></div>
+    <div><div class="k mono">Modos</div><div class="v">Claro / Oscuro</div></div>
+    <div><div class="k mono">Acentos</div><div class="v">3 categorías</div></div>
+    <div><div class="k mono">Estándar</div><div class="v">WCAG AA</div></div>
+  </div>
+</div>
+
+<!-- ===== 01 BASE SCALE ===== -->
+<section>
+  <div class="section-head">
+    <div>
+      <div class="idx mono">01 — Base constante</div>
+      <h2>Escala Zinc</h2>
+      <p>Fondo, superficie, borde y texto — idénticos en las 14 apps, en modo claro y oscuro.</p>
+    </div>
+  </div>
+
+  <div style="margin-bottom:14px;"><strong style="font-size:13px;">Modo claro</strong></div>
+  <div class="base-grid" style="margin-bottom:48px;">
+    <div class="swatch"><div class="box" style="background:#FAFAFA;"></div><div class="name">Background</div><div class="hex mono">#FAFAFA</div><div class="use">Fondo de pantalla</div></div>
+    <div class="swatch"><div class="box" style="background:#FFFFFF;"></div><div class="name">Surface</div><div class="hex mono">#FFFFFF</div><div class="use">Tarjetas, hojas</div></div>
+    <div class="swatch"><div class="box" style="background:#F4F4F5;"></div><div class="name">Surface 2</div><div class="hex mono">#F4F4F5</div><div class="use">Campos, chips</div></div>
+    <div class="swatch"><div class="box" style="background:#E4E4E7;"></div><div class="name">Border</div><div class="hex mono">#E4E4E7</div><div class="use">Divisores</div></div>
+    <div class="swatch"><div class="box" style="background:#18181B;"></div><div class="name">Text primary</div><div class="hex mono">#18181B</div><div class="use">16.97:1 ✓ AAA</div></div>
+    <div class="swatch"><div class="box" style="background:#71717A;"></div><div class="name">Text secondary</div><div class="hex mono">#71717A</div><div class="use">4.63:1 ✓ AA</div></div>
+  </div>
+
+  <div style="margin-bottom:14px;"><strong style="font-size:13px;">Modo oscuro</strong></div>
+  <div class="base-grid" style="background:#000; border-color:#27272A;">
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#09090B; border-color:#27272A;"></div><div class="name" style="color:#fff;">Background</div><div class="hex mono" style="color:#A1A1AA;">#09090B</div><div class="use" style="color:#A1A1AA;">Fondo de pantalla</div></div>
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#18181B; border-color:#27272A;"></div><div class="name" style="color:#fff;">Surface</div><div class="hex mono" style="color:#A1A1AA;">#18181B</div><div class="use" style="color:#A1A1AA;">Tarjetas, hojas</div></div>
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#27272A; border-color:#3F3F46;"></div><div class="name" style="color:#fff;">Surface 2</div><div class="hex mono" style="color:#A1A1AA;">#27272A</div><div class="use" style="color:#A1A1AA;">Campos, chips</div></div>
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#3F3F46;"></div><div class="name" style="color:#fff;">Border</div><div class="hex mono" style="color:#A1A1AA;">#3F3F46</div><div class="use" style="color:#A1A1AA;">Divisores</div></div>
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#FAFAFA;"></div><div class="name" style="color:#fff;">Text primary</div><div class="hex mono" style="color:#A1A1AA;">#FAFAFA</div><div class="use" style="color:#A1A1AA;">19.06:1 ✓ AAA</div></div>
+    <div class="swatch" style="background:#09090B;"><div class="box" style="background:#A1A1AA;"></div><div class="name" style="color:#fff;">Text secondary</div><div class="hex mono" style="color:#A1A1AA;">#A1A1AA</div><div class="use" style="color:#A1A1AA;">7.76:1 ✓ AAA</div></div>
+  </div>
+</section>
+
+<!-- ===== 02 ACCENTS ===== -->
+<section>
+  <div class="section-head">
+    <div>
+      <div class="idx mono">02 — Acentos variables</div>
+      <h2>Tres categorías</h2>
+      <p>Cada acento tiene un tono para claro y uno para oscuro, calibrados por separado para cumplir AA en su propio fondo.</p>
+    </div>
+  </div>
+
+  <div class="accent-grid">
+    <div class="accent-card">
+      <div class="accent-top">
+        <div class="accent-cat mono" style="color:#2563EB;">Categoría 1</div>
+        <div class="accent-name">Productividad</div>
+        <div class="accent-apps">PDF, escáner de texto, notas, editor</div>
+      </div>
+      <div class="accent-swatches">
+        <div class="accent-sw on-light">
+          <div class="lab">Modo claro</div>
+          <div class="chip" style="background:#2563EB;"></div>
+          <div class="hexlabel">#2563EB</div>
+          <div class="contrast">4.95:1 sobre #FAFAFA <span class="pass-badge">AA ✓</span></div>
+        </div>
+        <div class="accent-sw on-dark">
+          <div class="lab">Modo oscuro</div>
+          <div class="chip" style="background:#60A5FA;"></div>
+          <div class="hexlabel">#60A5FA</div>
+          <div class="contrast">7.83:1 sobre #09090B <span class="pass-badge" style="background:#052e16;color:#4ade80;">AAA ✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accent-card">
+      <div class="accent-top">
+        <div class="accent-cat mono" style="color:#0F766E;">Categoría 2</div>
+        <div class="accent-name">Utilidades</div>
+        <div class="accent-apps">QR, linterna, brújula, medidor</div>
+      </div>
+      <div class="accent-swatches">
+        <div class="accent-sw on-light">
+          <div class="lab">Modo claro</div>
+          <div class="chip" style="background:#0F766E;"></div>
+          <div class="hexlabel">#0F766E</div>
+          <div class="contrast">5.24:1 sobre #FAFAFA <span class="pass-badge">AA ✓</span></div>
+        </div>
+        <div class="accent-sw on-dark">
+          <div class="lab">Modo oscuro</div>
+          <div class="chip" style="background:#2DD4BF;"></div>
+          <div class="hexlabel">#2DD4BF</div>
+          <div class="contrast">10.69:1 sobre #09090B <span class="pass-badge" style="background:#052e16;color:#4ade80;">AAA ✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accent-card">
+      <div class="accent-top">
+        <div class="accent-cat mono" style="color:#B45309;">Categoría 3</div>
+        <div class="accent-name">Tiempo &amp; Cálculo</div>
+        <div class="accent-apps">Temporizador, calculadora, unidades</div>
+      </div>
+      <div class="accent-swatches">
+        <div class="accent-sw on-light">
+          <div class="lab">Modo claro</div>
+          <div class="chip" style="background:#B45309;"></div>
+          <div class="hexlabel">#B45309</div>
+          <div class="contrast">4.81:1 sobre #FAFAFA <span class="pass-badge">AA ✓</span></div>
+        </div>
+        <div class="accent-sw on-dark">
+          <div class="lab">Modo oscuro</div>
+          <div class="chip" style="background:#FBBF24;"></div>
+          <div class="hexlabel">#FBBF24</div>
+          <div class="contrast">11.92:1 sobre #09090B <span class="pass-badge" style="background:#052e16;color:#4ade80;">AAA ✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:20px; font-size:12px; color:var(--l-text2); max-width:70ch;">
+    Nota de calibración: el ámbar estándar (500/600) es demasiado claro para superar 4.5:1 sobre blanco — por eso el tono de acento en claro es más profundo (#B45309, "amber-700") mientras que en oscuro se usa un ámbar más claro y saturado (#FBBF24). El mismo principio se aplicó al teal, usando #0F766E ("teal-700") en vez de un teal más brillante que fallaba AA sobre fondos claros.
+  </p>
+</section>
+
+<!-- ===== 03 PREVIEW ===== -->
+<section>
+  <div class="section-head">
+    <div>
+      <div class="idx mono">03 — Vista previa</div>
+      <h2>En contexto</h2>
+      <p>Cómo se ve cada categoría aplicada a botones, íconos y tarjetas.</p>
+    </div>
+  </div>
+
+  <p style="font-size:12px; color:var(--l-text2); margin-bottom:20px;">Cada app se ve idéntica en estructura — solo cambia el acento de categoría y el modo. Así se mantiene la coherencia entre las 14 apps y entre temas.</p>
+
+  <div style="margin-bottom:14px;"><strong style="font-size:13px;">Modo claro</strong></div>
+  <div class="preview-wrap" style="margin-bottom:32px;">
+    <div class="phone light" style="border-color:#E4E4E7;">
+      <div class="app-icon" style="background:#2563EB;">P</div>
+      <div>
+        <div class="phone-title">PDF Reader</div>
+        <div class="phone-sub">3 documentos recientes</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#EFF6FF; color:#2563EB;">Documentos</span>
+      </div>
+      <div class="btn-primary" style="background:#2563EB;">Abrir archivo</div>
+    </div>
+
+    <div class="phone light" style="border-color:#E4E4E7;">
+      <div class="app-icon" style="background:#0F766E;">Q</div>
+      <div>
+        <div class="phone-title">QR Scanner</div>
+        <div class="phone-sub">Apunta la cámara al código</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#F0FDFA; color:#0F766E;">Utilidades</span>
+      </div>
+      <div class="btn-primary" style="background:#0F766E;">Escanear ahora</div>
+    </div>
+
+    <div class="phone light" style="border-color:#E4E4E7;">
+      <div class="app-icon" style="background:#B45309;">T</div>
+      <div>
+        <div class="phone-title">Timer</div>
+        <div class="phone-sub">04:32 restantes</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#FFFBEB; color:#B45309;">Tiempo &amp; Cálculo</span>
+      </div>
+      <div class="btn-primary" style="background:#B45309;">Iniciar</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:14px;"><strong style="font-size:13px;">Modo oscuro</strong></div>
+  <div class="preview-wrap">
+    <div class="phone dark" style="border-color:#27272A;">
+      <div class="app-icon" style="background:#60A5FA; color:#0B1220;">P</div>
+      <div>
+        <div class="phone-title">PDF Reader</div>
+        <div class="phone-sub">3 documentos recientes</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#1e293b; color:#60A5FA;">Documentos</span>
+      </div>
+      <div class="btn-primary" style="background:#60A5FA; color:#0B1220;">Abrir archivo</div>
+    </div>
+
+    <div class="phone dark" style="border-color:#27272A;">
+      <div class="app-icon" style="background:#2DD4BF; color:#042f2c;">Q</div>
+      <div>
+        <div class="phone-title">QR Scanner</div>
+        <div class="phone-sub">Apunta la cámara al código</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#042f2c; color:#2DD4BF;">Utilidades</span>
+      </div>
+      <div class="btn-primary" style="background:#2DD4BF; color:#042f2c;">Escanear ahora</div>
+    </div>
+
+    <div class="phone dark" style="border-color:#27272A;">
+      <div class="app-icon" style="background:#FBBF24; color:#18181B;">T</div>
+      <div>
+        <div class="phone-title">Timer</div>
+        <div class="phone-sub">04:32 restantes</div>
+      </div>
+      <div class="card-row">
+        <span class="pill" style="background:#3f2d05; color:#FBBF24;">Tiempo &amp; Cálculo</span>
+      </div>
+      <div class="btn-primary" style="background:#FBBF24; color:#18181B;">Iniciar</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOKENS SEMÁNTICOS PARA CONSISTENCIA ===== -->
+<section>
+  <div class="section-head">
+    <div>
+      <div class="idx mono">04 — Consistencia entre apps</div>
+      <h2>Tokens semánticos</h2>
+      <p>Cada una de las 14 apps consume los mismos nombres de variable. Solo cambia qué valor de acento se inyecta según la categoría — así el cambio de tema claro/oscuro queda sincronizado en todo el ecosistema.</p>
+    </div>
+  </div>
+  <div style="background:var(--l-surface2); border:1px solid var(--l-border); border-radius:10px; padding:20px 24px; overflow-x:auto;">
+    <pre class="mono" style="font-size:12.5px; line-height:1.7; white-space:pre;">:root[data-theme="light"]{
+  --bg: #FAFAFA;      --surface: #FFFFFF;   --surface-2: #F4F4F5;
+  --border: #E4E4E7;  --text: #18181B;      --text-2: #71717A;
+}
+:root[data-theme="dark"]{
+  --bg: #09090B;      --surface: #18181B;   --surface-2: #27272A;
+  --border: #3F3F46;  --text: #FAFAFA;      --text-2: #A1A1AA;
+}
+
+/* Cada app declara SOLO su acento — el resto hereda del tema global */
+[data-category="productivity"][data-theme="light"]{ --accent: #2563EB; }
+[data-category="productivity"][data-theme="dark"] { --accent: #60A5FA; }
+
+[data-category="utilities"][data-theme="light"]{ --accent: #0F766E; }
+[data-category="utilities"][data-theme="dark"] { --accent: #2DD4BF; }
+
+[data-category="time-math"][data-theme="light"]{ --accent: #B45309; }
+[data-category="time-math"][data-theme="dark"] { --accent: #FBBF24; }</pre>
+  </div>
+  <p style="margin-top:16px; font-size:12px; color:var(--l-text2); max-width:70ch;">
+    Regla práctica: <strong>ninguna app fija colores base propios</strong>. <code class="mono">--bg</code>, <code class="mono">--surface</code>, <code class="mono">--text</code>, etc. vienen siempre del tema activo del sistema; solo <code class="mono">--accent</code> varía, y varía por categoría — no por app individual. Esto garantiza que al pasar de claro a oscuro en cualquiera de las 14 apps, la transición se sienta idéntica y coordinada.
+  </p>
+</section>
+
+<!-- ===== 04 TOKEN TABLE ===== -->
+<section style="border-bottom:none;">
+  <div class="section-head">
+    <div>
+      <div class="idx mono">05 — Tabla de tokens</div>
+      <h2>Referencia exacta</h2>
+      <p>Todos los valores hexadecimales, listos para copiar a Figma o código.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Token</th><th>Claro</th><th>Oscuro</th><th>Uso</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>background</td><td class="hexcell"><span class="swatch-dot" style="background:#FAFAFA; border-color:#ddd;"></span>#FAFAFA</td><td class="hexcell"><span class="swatch-dot" style="background:#09090B;"></span>#09090B</td><td>Fondo raíz</td></tr>
+      <tr><td>surface</td><td class="hexcell"><span class="swatch-dot" style="background:#FFFFFF; border-color:#ddd;"></span>#FFFFFF</td><td class="hexcell"><span class="swatch-dot" style="background:#18181B;"></span>#18181B</td><td>Tarjetas / hojas</td></tr>
+      <tr><td>surface-2</td><td class="hexcell"><span class="swatch-dot" style="background:#F4F4F5;"></span>#F4F4F5</td><td class="hexcell"><span class="swatch-dot" style="background:#27272A;"></span>#27272A</td><td>Campos / chips</td></tr>
+      <tr><td>border</td><td class="hexcell"><span class="swatch-dot" style="background:#E4E4E7;"></span>#E4E4E7</td><td class="hexcell"><span class="swatch-dot" style="background:#3F3F46;"></span>#3F3F46</td><td>Divisores</td></tr>
+      <tr><td>text-primary</td><td class="hexcell"><span class="swatch-dot" style="background:#18181B;"></span>#18181B</td><td class="hexcell"><span class="swatch-dot" style="background:#FAFAFA;"></span>#FAFAFA</td><td>Texto principal</td></tr>
+      <tr><td>text-secondary</td><td class="hexcell"><span class="swatch-dot" style="background:#71717A;"></span>#71717A</td><td class="hexcell"><span class="swatch-dot" style="background:#A1A1AA;"></span>#A1A1AA</td><td>Texto secundario</td></tr>
+      <tr><td>accent-productivity</td><td class="hexcell"><span class="swatch-dot" style="background:#2563EB;"></span>#2563EB</td><td class="hexcell"><span class="swatch-dot" style="background:#60A5FA;"></span>#60A5FA</td><td>Docs, PDF, notas</td></tr>
+      <tr><td>accent-utilities</td><td class="hexcell"><span class="swatch-dot" style="background:#0F766E;"></span>#0F766E</td><td class="hexcell"><span class="swatch-dot" style="background:#2DD4BF;"></span>#2DD4BF</td><td>QR, escáner, dispositivo</td></tr>
+      <tr><td>accent-time-math</td><td class="hexcell"><span class="swatch-dot" style="background:#B45309;"></span>#B45309</td><td class="hexcell"><span class="swatch-dot" style="background:#FBBF24;"></span>#FBBF24</td><td>Timer, calculadora</td></tr>
+      <tr><td>danger</td><td class="hexcell"><span class="swatch-dot" style="background:#DC2626;"></span>#DC2626</td><td class="hexcell"><span class="swatch-dot" style="background:#F87171;"></span>#F87171</td><td>Errores, eliminar</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <div class="mono">4ALL — Sistema de identidad cromática · v1.0 · Zinc + 3 acentos categóricos</div>
+  <div class="mono">WCAG AA verificado sobre fondo y superficie</div>
+</footer>
+
+</body>
+</html>

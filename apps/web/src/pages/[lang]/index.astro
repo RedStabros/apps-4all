@@ -1,0 +1,1133 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AppCard from '../../components/AppCard.astro';
+import { APPS_DATA } from '../../data/appsData';
+
+export function getStaticPaths() {
+  const locales = ["en", "es", "pt", "it", "tr", "pl", "hi", "id", "ru", "fr", "de", "zh-CN", "zh-TW", "ko", "ja", "vi", "th", "bn", "fil", "sw", "ha", "ms", "uk", "ta", "te", "mr"];
+  return locales.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+
+// ─────────────────────────────────────────────
+//  Full translations for all 26 locales
+// ─────────────────────────────────────────────
+const translations = {
+  en: {
+    meta_desc:          "Para Todos (4All) — 15 offline, privacy-first utility apps in 26 languages. Free. No tracking.",
+    hero_title_1:       "Apps for",
+    hero_title_2:       "Everyone.",
+    hero_subtitle:      "A growing ecosystem of 100% offline, privacy-first utility apps. Optional accounts. No ads. No tracking. Just tools that work.",
+    hero_cta:           "Explore Apps",
+    hero_cta2:          "Learn more",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 Languages",
+    badge_free:         "Always Free",
+    why_title:          "Built on three pillars",
+    why_privacy_title:  "Privacy by Design",
+    why_privacy_desc:   "No hidden tracking, no telemetry, no analytics. Your data stays on your device, with 100% optional cloud sync.",
+    why_offline_title:  "Works Offline",
+    why_offline_desc:   "Full functionality without internet. All processing happens locally on your device CPU.",
+    why_global_title:   "For Everyone",
+    why_global_desc:    "Fully localized in 26 languages, designed to be accessible and useful for people worldwide.",
+    cat_section_title:  "Our App Ecosystem",
+    cat_section_sub:    "15 apps organized into three focused categories",
+    cat_productivity:   "Productivity",
+    cat_productivity_d: "Tools to capture, secure, and manage your information.",
+    cat_utilities:      "Utilities",
+    cat_utilities_d:    "Everyday tools for file management, media, and device control.",
+    cat_time_math:      "Time & Math",
+    cat_time_math_d:    "Calculators, timers, converters, and randomizers.",
+    download_apk:       "Download APK",
+    stats_apps:         "15 Apps",
+    stats_languages:    "26 Languages",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Apps for everyone, everywhere.",
+  },
+  es: {
+    meta_desc:          "Para Todos (4All) — 15 apps de utilidad 100% offline en 26 idiomas. Gratis. Sin rastreo.",
+    hero_title_1:       "Apps para",
+    hero_title_2:       "Todos.",
+    hero_subtitle:      "Un ecosistema de apps de utilidad 100% offline, enfocadas en la privacidad. Cuentas opcionales. Sin anuncios. Sin rastreo.",
+    hero_cta:           "Explorar Apps",
+    hero_cta2:          "Saber más",
+    badge_offline:      "100% Sin conexión",
+    badge_languages:    "26 Idiomas",
+    badge_free:         "Siempre Gratis",
+    why_title:          "Construido sobre tres pilares",
+    why_privacy_title:  "Privacidad por Diseño",
+    why_privacy_desc:   "Sin rastreo oculto, sin telemetría ni analítica. Tus datos quedan en tu dispositivo, con sincronización opcional en la nube.",
+    why_offline_title:  "Funciona Sin Internet",
+    why_offline_desc:   "Funcionalidad completa sin conexión. Todo el procesamiento ocurre localmente en el CPU.",
+    why_global_title:   "Para Todos",
+    why_global_desc:    "Completamente localizado en 26 idiomas, diseñado para ser accesible y útil en todo el mundo.",
+    cat_section_title:  "Nuestro Ecosistema de Apps",
+    cat_section_sub:    "15 apps organizadas en tres categorías",
+    cat_productivity:   "Productividad",
+    cat_productivity_d: "Herramientas para capturar, proteger y gestionar tu información.",
+    cat_utilities:      "Utilidades",
+    cat_utilities_d:    "Herramientas cotidianas para archivos, multimedia y control del dispositivo.",
+    cat_time_math:      "Tiempo y Matemáticas",
+    cat_time_math_d:    "Calculadoras, temporizadores, conversores y generadores aleatorios.",
+    download_apk:       "Descargar APK",
+    stats_apps:         "15 Apps",
+    stats_languages:    "26 Idiomas",
+    stats_offline:      "100% Sin Conexión",
+    footer_tagline:     "Apps para todos, en todas partes.",
+  },
+  pt: {
+    meta_desc:          "Para Todos (4All) — 15 apps de utilidade 100% offline em 26 idiomas. Grátis. Sem rastreamento.",
+    hero_title_1:       "Apps para",
+    hero_title_2:       "Todos.",
+    hero_subtitle:      "Um ecossistema de apps de utilidade 100% offline, focadas em privacidade. Contas opcionais. Sem anúncios. Sem rastreamento.",
+    hero_cta:           "Explorar Apps",
+    hero_cta2:          "Saiba mais",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 Idiomas",
+    badge_free:         "Sempre Gratuito",
+    why_title:          "Construído sobre três pilares",
+    why_privacy_title:  "Privacidade por Design",
+    why_privacy_desc:   "Sem rastreamento oculto, sem telemetria. Seus dados ficam no seu dispositivo, com sincronização em nuvem opcional.",
+    why_offline_title:  "Funciona Offline",
+    why_offline_desc:   "Funcionalidade completa sem internet. Todo o processamento é feito localmente no seu dispositivo.",
+    why_global_title:   "Para Todos",
+    why_global_desc:    "Completamente localizado em 26 idiomas para ser acessível e útil para pessoas no mundo todo.",
+    cat_section_title:  "Nosso Ecossistema de Apps",
+    cat_section_sub:    "15 apps organizados em três categorias",
+    cat_productivity:   "Produtividade",
+    cat_productivity_d: "Ferramentas para capturar, proteger e gerenciar suas informações.",
+    cat_utilities:      "Utilitários",
+    cat_utilities_d:    "Ferramentas para arquivos, mídia e controle do dispositivo.",
+    cat_time_math:      "Tempo e Matemática",
+    cat_time_math_d:    "Calculadoras, temporizadores, conversores e randomizadores.",
+    download_apk:       "Baixar APK",
+    stats_apps:         "15 Apps",
+    stats_languages:    "26 Idiomas",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Apps para todos, em todo lugar.",
+  },
+  it: {
+    meta_desc:          "Para Todos (4All) — 15 app di utilità 100% offline in 17 lingue. Gratuite. Senza tracciamento.",
+    hero_title_1:       "App per",
+    hero_title_2:       "Tutti.",
+    hero_subtitle:      "Un ecosistema di app di utilità 100% offline, incentrate sulla privacy. Account opzionali. Nessuna pubblicità. Nessun tracciamento.",
+    hero_cta:           "Esplora le App",
+    hero_cta2:          "Scopri di più",
+    badge_offline:      "100% Offline",
+    badge_languages:    "17 Lingue",
+    badge_free:         "Sempre Gratuito",
+    why_title:          "Costruito su tre pilastri",
+    why_privacy_title:  "Privacy by Design",
+    why_privacy_desc:   "Nessun tracciamento nascosto, nessuna telemetria. I tuoi dati restano sul dispositivo, con sincronizzazione cloud opzionale.",
+    why_offline_title:  "Funziona Offline",
+    why_offline_desc:   "Funzionalità completa senza internet. Tutta l'elaborazione avviene localmente sulla CPU del dispositivo.",
+    why_global_title:   "Per Tutti",
+    why_global_desc:    "Completamente localizzato in 17 lingue per essere accessibile e utile a persone in tutto il mondo.",
+    cat_section_title:  "Il Nostro Ecosistema di App",
+    cat_section_sub:    "15 app organizzate in tre categorie mirate",
+    cat_productivity:   "Produttività",
+    cat_productivity_d: "Strumenti per acquisire, proteggere e gestire le tue informazioni.",
+    cat_utilities:      "Utilità",
+    cat_utilities_d:    "Strumenti quotidiani per gestione file, contenuti multimediali e controllo dispositivo.",
+    cat_time_math:      "Tempo e Matematica",
+    cat_time_math_d:    "Calcolatrici, timer, convertitori e generatori casuali.",
+    download_apk:       "Scarica APK",
+    stats_apps:         "15 App",
+    stats_languages:    "17 Lingue",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "App per tutti, ovunque.",
+  },
+  tr: {
+    meta_desc:          "Para Todos (4All) — 26 dilde %100 çevrimdışı 15 yardımcı uygulama. Ücretsiz. Takip yok.",
+    hero_title_1:       "Herkes İçin",
+    hero_title_2:       "Uygulamalar.",
+    hero_subtitle:      "%100 çevrimdışı ve gizlilik odaklı yardımcı uygulama ekosistemi. İsteğe bağlı hesaplar. Reklamsız. Takipsiz.",
+    hero_cta:           "Uygulamaları Keşfet",
+    hero_cta2:          "Daha Fazla Bilgi",
+    badge_offline:      "%100 Çevrimdışı",
+    badge_languages:    "17 Dil",
+    badge_free:         "Her Zaman Ücretsiz",
+    why_title:          "Üç temel ilke üzerine inşa edildi",
+    why_privacy_title:  "Tasarım Gereği Gizlilik",
+    why_privacy_desc:   "Gizli takip yok, telemetri yok. Verileriniz cihazınızda kalır, bulut senkronizasyonu isteğe bağlıdır.",
+    why_offline_title:  "Çevrimdışı Çalışır",
+    why_offline_desc:   "İnternet olmadan tam işlevsellik. Tüm işlemler cihazınızın CPU'sunda yerel olarak yapılır.",
+    why_global_title:   "Herkes İçin",
+    why_global_desc:    "Dünyanın her yerindeki insanlar için erişilebilir ve kullanışlı olmak üzere 26 dilde tamamen yerelleştirildi.",
+    cat_section_title:  "Uygulama Ekosistemimiz",
+    cat_section_sub:    "Üç odak kategoride düzenlenmiş 15 uygulama",
+    cat_productivity:   "Verimlilik",
+    cat_productivity_d: "Bilgilerinizi kaydetmek, güvenceye almak ve yönetmek için araçlar.",
+    cat_utilities:      "Araçlar",
+    cat_utilities_d:    "Dosya yönetimi, medya ve cihaz kontrolü için günlük araçlar.",
+    cat_time_math:      "Zaman ve Matematik",
+    cat_time_math_d:    "Hesap makineleri, zamanlayıcılar, dönüştürücüler ve rastgele oluşturucular.",
+    download_apk:       "APK İndir",
+    stats_apps:         "15 Uygulama",
+    stats_languages:    "17 Dil",
+    stats_offline:      "%100 Çevrimdışı",
+    footer_tagline:     "Her yerde, herkes için uygulamalar.",
+  },
+  pl: {
+    meta_desc:          "Para Todos (4All) — 15 aplikacji narzędziowych 100% offline w 17 językach. Bezpłatne. Bez śledzenia.",
+    hero_title_1:       "Aplikacje dla",
+    hero_title_2:       "Wszystkich.",
+    hero_subtitle:      "Ekosystem aplikacji narzędziowych w 100% offline, stawiających na prywatność. Opcjonalne konta. Bez reklam. Bez śledzenia.",
+    hero_cta:           "Przeglądaj aplikacje",
+    hero_cta2:          "Dowiedz się więcej",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 Języków",
+    badge_free:         "Zawsze Za Darmo",
+    why_title:          "Zbudowane na trzech filarach",
+    why_privacy_title:  "Prywatność z założenia",
+    why_privacy_desc:   "Żadnego ukrytego śledzenia ani telemetrii. Twoje dane pozostają na urządzeniu, z opcjonalną synchronizacją w chmurze.",
+    why_offline_title:  "Działa offline",
+    why_offline_desc:   "Pełna funkcjonalność bez internetu. Całe przetwarzanie odbywa się lokalnie na procesorze urządzenia.",
+    why_global_title:   "Dla Wszystkich",
+    why_global_desc:    "W pełni zlokalizowane w 17 językach, zaprojektowane tak, aby były dostępne i przydatne na całym świecie.",
+    cat_section_title:  "Nasz ekosystem aplikacji",
+    cat_section_sub:    "15 aplikacji zorganizowanych w trzech kategoriach",
+    cat_productivity:   "Produktywność",
+    cat_productivity_d: "Narzędzia do przechwytywania, zabezpieczania i zarządzania informacjami.",
+    cat_utilities:      "Narzędzia",
+    cat_utilities_d:    "Codzienne narzędzia do zarządzania plikami, multimediami i kontrolą urządzenia.",
+    cat_time_math:      "Czas i Matematyka",
+    cat_time_math_d:    "Kalkulatory, minutniki, konwertery i generatory losowe.",
+    download_apk:       "Pobierz APK",
+    stats_apps:         "15 Aplikacji",
+    stats_languages:    "26 Języków",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Aplikacje dla każdego, wszędzie.",
+  },
+  hi: {
+    meta_desc:          "Para Todos (4All) — 17 भाषाओं में 15 ऑफ़लाइन यूटिलिटी ऐप्स। मुफ़्त। बिना ट्रैकिंग के।",
+    hero_title_1:       "सबके लिए",
+    hero_title_2:       "ऐप्स।",
+    hero_subtitle:      "100% ऑफ़लाइन, गोपनीयता-केंद्रित उपयोगिता ऐप्स का एक पारिस्थितिकी तंत्र। वैकल्पिक खाते। कोई विज्ञापन नहीं। कोई ट्रैकिंग नहीं।",
+    hero_cta:           "ऐप्स देखें",
+    hero_cta2:          "और जानें",
+    badge_offline:      "100% ऑफ़लाइन",
+    badge_languages:    "26 भाषाएँ",
+    badge_free:         "हमेशा मुफ़्त",
+    why_title:          "तीन स्तंभों पर निर्मित",
+    why_privacy_title:  "डिज़ाइन द्वारा गोपनीयता",
+    why_privacy_desc:   "कोई छिपी हुई ट्रैकिंग नहीं, कोई टेलीमेट्री नहीं। आपका डेटा आपके डिवाइस पर रहता है, वैकल्पिक क्लाउड सिंक के साथ।",
+    why_offline_title:  "ऑफ़लाइन काम करता है",
+    why_offline_desc:   "इंटरनेट के बिना पूर्ण कार्यक्षमता। सभी प्रसंस्करण स्थानीय रूप से आपके CPU पर होता है।",
+    why_global_title:   "सभी के लिए",
+    why_global_desc:    "17 भाषाओं में पूरी तरह से स्थानीयकृत, दुनिया भर के लोगों के लिए सुलभ।",
+    cat_section_title:  "हमारा ऐप पारिस्थितिकी तंत्र",
+    cat_section_sub:    "तीन श्रेणियों में 15 ऐप्स",
+    cat_productivity:   "उत्पादकता",
+    cat_productivity_d: "अपनी जानकारी को कैप्चर, सुरक्षित और प्रबंधित करने के उपकरण।",
+    cat_utilities:      "उपयोगिताएँ",
+    cat_utilities_d:    "फ़ाइल प्रबंधन, मीडिया और डिवाइस नियंत्रण के लिए दैनिक उपकरण।",
+    cat_time_math:      "समय और गणित",
+    cat_time_math_d:    "कैलकुलेटर, टाइमर, कन्वर्टर और रैंडमाइज़र।",
+    download_apk:       "APK डाउनलोड करें",
+    stats_apps:         "15 ऐप्स",
+    stats_languages:    "26 भाषाएँ",
+    stats_offline:      "100% ऑफ़लाइन",
+    footer_tagline:     "हर जगह, सबके लिए ऐप्स।",
+  },
+  id: {
+    meta_desc:          "Para Todos (4All) — 15 aplikasi utilitas 100% offline dalam 17 bahasa. Gratis. Tanpa pelacakan.",
+    hero_title_1:       "Aplikasi untuk",
+    hero_title_2:       "Semua.",
+    hero_subtitle:      "Ekosistem aplikasi utilitas 100% offline yang berfokus pada privasi. Akun opsional. Tanpa iklan. Tanpa pelacakan.",
+    hero_cta:           "Jelajahi Aplikasi",
+    hero_cta2:          "Pelajari lebih lanjut",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 Bahasa",
+    badge_free:         "Selalu Gratis",
+    why_title:          "Dibangun di atas tiga pilar",
+    why_privacy_title:  "Privasi sejak Desain",
+    why_privacy_desc:   "Tanpa pelacakan tersembunyi, tanpa telemetri. Data Anda tetap di perangkat Anda, dengan sinkronisasi cloud opsional.",
+    why_offline_title:  "Bekerja Offline",
+    why_offline_desc:   "Fungsionalitas penuh tanpa internet. Semua pemrosesan dilakukan secara lokal di CPU perangkat Anda.",
+    why_global_title:   "Untuk Semua",
+    why_global_desc:    "Sepenuhnya dilokalisasi dalam 17 bahasa untuk dapat diakses oleh orang-orang di seluruh dunia.",
+    cat_section_title:  "Ekosistem Aplikasi Kami",
+    cat_section_sub:    "15 aplikasi dalam tiga kategori",
+    cat_productivity:   "Produktivitas",
+    cat_productivity_d: "Alat untuk menangkap, mengamankan, dan mengelola informasi Anda.",
+    cat_utilities:      "Utilitas",
+    cat_utilities_d:    "Alat sehari-hari untuk manajemen file, media, dan kontrol perangkat.",
+    cat_time_math:      "Waktu & Matematika",
+    cat_time_math_d:    "Kalkulator, timer, konverter, dan pengacak.",
+    download_apk:       "Unduh APK",
+    stats_apps:         "15 Aplikasi",
+    stats_languages:    "26 Bahasa",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Aplikasi untuk semua orang, di mana saja.",
+  },
+  ru: {
+    meta_desc:          "Para Todos (4All) — 15 офлайн-приложений на 17 языках. Бесплатно. Без слежки.",
+    hero_title_1:       "Приложения для",
+    hero_title_2:       "всех.",
+    hero_subtitle:      "Экосистема офлайн-утилит с акцентом на конфиденциальность. Аккаунт по желанию. Без рекламы. Без слежки.",
+    hero_cta:           "Смотреть приложения",
+    hero_cta2:          "Узнать больше",
+    badge_offline:      "100% офлайн",
+    badge_languages:    "26 языков",
+    badge_free:         "Всегда бесплатно",
+    why_title:          "Три основных принципа",
+    why_privacy_title:  "Конфиденциальность",
+    why_privacy_desc:   "Никакой скрытой слежки, никакой телеметрии. Ваши данные остаются на устройстве, облачная синхронизация опциональна.",
+    why_offline_title:  "Работает офлайн",
+    why_offline_desc:   "Полная функциональность без интернета. Всё обрабатывается локально на вашем процессоре.",
+    why_global_title:   "Для всех",
+    why_global_desc:    "Полностью локализовано на 26 языков для людей по всему миру.",
+    cat_section_title:  "Наша экосистема приложений",
+    cat_section_sub:    "15 приложений в трёх категориях",
+    cat_productivity:   "Продуктивность",
+    cat_productivity_d: "Инструменты для записи, защиты и управления информацией.",
+    cat_utilities:      "Утилиты",
+    cat_utilities_d:    "Повседневные инструменты для файлов, медиа и управления устройством.",
+    cat_time_math:      "Время и математика",
+    cat_time_math_d:    "Калькуляторы, таймеры, конвертеры и генераторы случайных чисел.",
+    download_apk:       "Скачать APK",
+    stats_apps:         "15 приложений",
+    stats_languages:    "26 языков",
+    stats_offline:      "100% офлайн",
+    footer_tagline:     "Приложения для всех, везде.",
+  },
+  fr: {
+    meta_desc:          "Para Todos (4All) — 15 applications utilitaires 100% hors ligne en 17 langues. Gratuites. Sans pistage.",
+    hero_title_1:       "Des apps pour",
+    hero_title_2:       "tous.",
+    hero_subtitle:      "Un écosystème d'applications 100% hors ligne axées sur la confidentialité. Compte optionnel. Sans publicité. Sans pistage.",
+    hero_cta:           "Explorer les apps",
+    hero_cta2:          "En savoir plus",
+    badge_offline:      "100% Hors ligne",
+    badge_languages:    "26 Langues",
+    badge_free:         "Toujours gratuit",
+    why_title:          "Construit sur trois piliers",
+    why_privacy_title:  "Confidentialité par conception",
+    why_privacy_desc:   "Aucun pistage caché, aucune télémétrie. Vos données restent sur votre appareil, avec synchronisation cloud optionnelle.",
+    why_offline_title:  "Fonctionne hors ligne",
+    why_offline_desc:   "Fonctionnalité complète sans internet. Tout le traitement s'effectue localement sur votre CPU.",
+    why_global_title:   "Pour tous",
+    why_global_desc:    "Entièrement localisé en 17 langues pour être accessible à tous dans le monde entier.",
+    cat_section_title:  "Notre écosystème d'applications",
+    cat_section_sub:    "15 applications organisées en trois catégories",
+    cat_productivity:   "Productivité",
+    cat_productivity_d: "Outils pour capturer, sécuriser et gérer vos informations.",
+    cat_utilities:      "Utilitaires",
+    cat_utilities_d:    "Outils quotidiens pour la gestion de fichiers, les médias et le contrôle de l'appareil.",
+    cat_time_math:      "Temps & Maths",
+    cat_time_math_d:    "Calculatrices, minuteries, convertisseurs et générateurs aléatoires.",
+    download_apk:       "Télécharger APK",
+    stats_apps:         "15 Apps",
+    stats_languages:    "26 Langues",
+    stats_offline:      "100% Hors ligne",
+    footer_tagline:     "Des apps pour tous, partout.",
+  },
+  de: {
+    meta_desc:          "Para Todos (4All) — 15 Offline-Utility-Apps in 26 Sprachen. Kostenlos. Kein Tracking.",
+    hero_title_1:       "Apps für",
+    hero_title_2:       "alle.",
+    hero_subtitle:      "Ein Ökosystem aus 100% Offline-Utility-Apps mit Fokus auf Datenschutz. Optionales Konto. Keine Werbung. Kein Tracking.",
+    hero_cta:           "Apps entdecken",
+    hero_cta2:          "Mehr erfahren",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 Sprachen",
+    badge_free:         "Immer kostenlos",
+    why_title:          "Auf drei Säulen aufgebaut",
+    why_privacy_title:  "Datenschutz by Design",
+    why_privacy_desc:   "Kein verstecktes Tracking, keine Telemetrie. Ihre Daten bleiben auf Ihrem Gerät, mit optionaler Cloud-Synchronisierung.",
+    why_offline_title:  "Funktioniert offline",
+    why_offline_desc:   "Volle Funktionalität ohne Internet. Die gesamte Verarbeitung erfolgt lokal auf Ihrer CPU.",
+    why_global_title:   "Für alle",
+    why_global_desc:    "Vollständig in 26 Sprachen lokalisiert, um für Menschen weltweit zugänglich zu sein.",
+    cat_section_title:  "Unser App-Ökosystem",
+    cat_section_sub:    "15 Apps in drei Kategorien",
+    cat_productivity:   "Produktivität",
+    cat_productivity_d: "Werkzeuge zum Erfassen, Sichern und Verwalten Ihrer Informationen.",
+    cat_utilities:      "Dienstprogramme",
+    cat_utilities_d:    "Alltagstools für Dateiverwaltung, Medien und Gerätesteuerung.",
+    cat_time_math:      "Zeit & Mathematik",
+    cat_time_math_d:    "Rechner, Timer, Konverter und Zufallsgeneratoren.",
+    download_apk:       "APK herunterladen",
+    stats_apps:         "15 Apps",
+    stats_languages:    "26 Sprachen",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Apps für alle, überall.",
+  },
+  "zh-CN": {
+    meta_desc:          "Para Todos (4All) — 15款100%离线实用工具应用，支持26种语言。免费。无追踪。",
+    hero_title_1:       "为所有人",
+    hero_title_2:       "打造的应用。",
+    hero_subtitle:      "一套100%离线、注重隐私的实用工具应用生态系统。账户完全自选。无广告。无追踪。",
+    hero_cta:           "浏览应用",
+    hero_cta2:          "了解更多",
+    badge_offline:      "100% 离线",
+    badge_languages:    "26种语言",
+    badge_free:         "永久免费",
+    why_title:          "建立在三大支柱之上",
+    why_privacy_title:  "隐私优先设计",
+    why_privacy_desc:   "无隐藏追踪，无遥测数据。您的数据保留在设备本地，云端同步完全可选。",
+    why_offline_title:  "离线可用",
+    why_offline_desc:   "无需网络，全功能使用。所有处理都在您的设备CPU上本地完成。",
+    why_global_title:   "为所有人",
+    why_global_desc:    "完整支持26种语言，让全球用户都能方便使用。",
+    cat_section_title:  "我们的应用生态系统",
+    cat_section_sub:    "15款应用，分为三大类别",
+    cat_productivity:   "生产力",
+    cat_productivity_d: "用于捕获、保护和管理信息的工具。",
+    cat_utilities:      "实用工具",
+    cat_utilities_d:    "用于文件管理、媒体和设备控制的日常工具。",
+    cat_time_math:      "时间与数学",
+    cat_time_math_d:    "计算器、计时器、转换器和随机生成器。",
+    download_apk:       "下载 APK",
+    stats_apps:         "15款应用",
+    stats_languages:    "26种语言",
+    stats_offline:      "100%离线",
+    footer_tagline:     "随时随地，为所有人服务的应用。",
+  },
+  "zh-TW": {
+    meta_desc:          "Para Todos (4All) — 15款100%離線實用工具應用，支援17種語言。免費。無追蹤。",
+    hero_title_1:       "為所有人",
+    hero_title_2:       "打造的應用。",
+    hero_subtitle:      "一套100%離線、注重隱私的實用工具應用生態系統。帳戶完全自選。無廣告。無追蹤。",
+    hero_cta:           "瀏覽應用",
+    hero_cta2:          "了解更多",
+    badge_offline:      "100% 離線",
+    badge_languages:    "17種語言",
+    badge_free:         "永久免費",
+    why_title:          "建立在三大支柱之上",
+    why_privacy_title:  "隱私優先設計",
+    why_privacy_desc:   "無隱藏追蹤，無遙測資料。您的資料保留在裝置本地，雲端同步完全可選。",
+    why_offline_title:  "離線可用",
+    why_offline_desc:   "無需網路，全功能使用。所有處理都在您的裝置CPU上本地完成。",
+    why_global_title:   "為所有人",
+    why_global_desc:    "完整支援17種語言，讓全球用戶都能方便使用。",
+    cat_section_title:  "我們的應用生態系統",
+    cat_section_sub:    "15款應用，分為三大類別",
+    cat_productivity:   "生產力",
+    cat_productivity_d: "用於擷取、保護和管理資訊的工具。",
+    cat_utilities:      "實用工具",
+    cat_utilities_d:    "用於檔案管理、媒體和裝置控制的日常工具。",
+    cat_time_math:      "時間與數學",
+    cat_time_math_d:    "計算機、計時器、轉換器和隨機生成器。",
+    download_apk:       "下載 APK",
+    stats_apps:         "15款應用",
+    stats_languages:    "17種語言",
+    stats_offline:      "100%離線",
+    footer_tagline:     "隨時隨地，為所有人服務的應用。",
+  },
+  ko: {
+    meta_desc:          "Para Todos (4All) — 26개 언어로 제공되는 15개의 100% 오프라인 유틸리티 앱. 무료. 추적 없음.",
+    hero_title_1:       "모두를 위한",
+    hero_title_2:       "앱.",
+    hero_subtitle:      "100% 오프라인, 프라이버시 중심의 유틸리티 앱 생태계. 선택적 계정. 광고 없음. 추적 없음.",
+    hero_cta:           "앱 살펴보기",
+    hero_cta2:          "자세히 알아보기",
+    badge_offline:      "100% 오프라인",
+    badge_languages:    "26개 언어",
+    badge_free:         "항상 무료",
+    why_title:          "세 가지 핵심 가치",
+    why_privacy_title:  "프라이버시 우선 설계",
+    why_privacy_desc:   "숨겨진 추적 없음, 원격 측정 없음. 귀하의 데이터는 기기에 보관되며 클라우드 동기화는 선택 사항입니다.",
+    why_offline_title:  "오프라인 작동",
+    why_offline_desc:   "인터넷 없이도 완전한 기능 사용. 모든 처리는 기기 CPU에서 로컬로 이루어집니다.",
+    why_global_title:   "모두를 위해",
+    why_global_desc:    "전 세계 사람들이 접근할 수 있도록 26개 언어로 완전히 현지화되었습니다.",
+    cat_section_title:  "앱 생태계",
+    cat_section_sub:    "세 가지 카테고리로 구성된 15개 앱",
+    cat_productivity:   "생산성",
+    cat_productivity_d: "정보를 캡처, 보호 및 관리하는 도구.",
+    cat_utilities:      "유틸리티",
+    cat_utilities_d:    "파일 관리, 미디어, 기기 제어를 위한 일상적인 도구.",
+    cat_time_math:      "시간 및 수학",
+    cat_time_math_d:    "계산기, 타이머, 변환기 및 랜덤 생성기.",
+    download_apk:       "APK 다운로드",
+    stats_apps:         "앱 15개",
+    stats_languages:    "언어 17개",
+    stats_offline:      "100% 오프라인",
+    footer_tagline:     "어디서나, 모두를 위한 앱.",
+  },
+  ja: {
+    meta_desc:          "Para Todos (4All) — 26言語対応の100%オフライン実用アプリ15本。無料。トラッキングなし。",
+    hero_title_1:       "すべての人への",
+    hero_title_2:       "アプリ。",
+    hero_subtitle:      "100%オフラインでプライバシー重視のユーティリティアプリエコシステム。アカウントは任意。広告なし。追跡なし。",
+    hero_cta:           "アプリを見る",
+    hero_cta2:          "詳しく見る",
+    badge_offline:      "100% オフライン",
+    badge_languages:    "26言語対応",
+    badge_free:         "常に無料",
+    why_title:          "3つの柱の上に構築",
+    why_privacy_title:  "プライバシー優先設計",
+    why_privacy_desc:   "隠しトラッキングなし、テレメトリなし。データは端末内に保持され、クラウド同期は完全任意です。",
+    why_offline_title:  "オフライン動作",
+    why_offline_desc:   "インターネットなしで完全に機能します。すべての処理はデバイスのCPUでローカルに行われます。",
+    why_global_title:   "すべての人へ",
+    why_global_desc:    "世界中の人々がアクセスできるよう、26言語に完全対応しています。",
+    cat_section_title:  "アプリエコシステム",
+    cat_section_sub:    "3つのカテゴリに分類された15本のアプリ",
+    cat_productivity:   "生産性",
+    cat_productivity_d: "情報をキャプチャ、保護、管理するツール。",
+    cat_utilities:      "ユーティリティ",
+    cat_utilities_d:    "ファイル管理、メディア、デバイス制御のための日常ツール.",
+    cat_time_math:      "時間・数学",
+    cat_time_math_d:    "計算機、タイマー、コンバーター、ランダム生成器。",
+    download_apk:       "APKをダウンロード",
+    stats_apps:         "15本のアプリ",
+    stats_languages:    "26言語",
+    stats_offline:      "100%オフライン",
+    footer_tagline:     "どこでも、すべての人へのアプリ。",
+  },
+  vi: {
+    meta_desc:          "Para Todos (4All) — 15 ứng dụng tiện ích 100% ngoại tuyến trong 17 ngôn ngữ. Miễn phí. Không theo dõi.",
+    hero_title_1:       "Ứng dụng cho",
+    hero_title_2:       "mọi người.",
+    hero_subtitle:      "Hệ sinh thái ứng dụng tiện ích 100% ngoại tuyến, ưu tiên quyền riêng tư. Tài khoản tùy chọn. Không quảng cáo. Không theo dõi.",
+    hero_cta:           "Khám phá ứng dụng",
+    hero_cta2:          "Tìm hiểu thêm",
+    badge_offline:      "100% Ngoại tuyến",
+    badge_languages:    "26 Ngôn ngữ",
+    badge_free:         "Luôn miễn phí",
+    why_title:          "Xây dựng trên ba trụ cột",
+    why_privacy_title:  "Quyền riêng tư",
+    why_privacy_desc:   "Không theo dõi ẩn, không đo lường từ xa. Dữ liệu lưu trên thiết bị của bạn, đồng bộ hóa đám mây là tùy chọn.",
+    why_offline_title:  "Hoạt động ngoại tuyến",
+    why_offline_desc:   "Đầy đủ chức năng không cần internet. Mọi xử lý đều diễn ra cục bộ trên CPU thiết bị của bạn.",
+    why_global_title:   "Cho mọi người",
+    why_global_desc:    "Được bản địa hóa hoàn toàn bằng 17 ngôn ngữ để mọi người trên thế giới có thể tiếp cận.",
+    cat_section_title:  "Hệ sinh thái ứng dụng",
+    cat_section_sub:    "15 ứng dụng trong ba danh mục",
+    cat_productivity:   "Năng suất",
+    cat_productivity_d: "Công cụ để nắm bắt, bảo mật và quản lý thông tin của bạn.",
+    cat_utilities:      "Tiện ích",
+    cat_utilities_d:    "Công cụ hàng ngày để quản lý tệp, phương tiện và điều khiển thiết bị.",
+    cat_time_math:      "Thời gian & Toán học",
+    cat_time_math_d:    "Máy tính, bộ đếm giờ, bộ chuyển đổi và trình tạo ngẫu nhiên.",
+    download_apk:       "Tải APK",
+    stats_apps:         "15 Ứng dụng",
+    stats_languages:    "26 Ngôn ngữ",
+    stats_offline:      "100% Ngoại tuyến",
+    footer_tagline:     "Ứng dụng cho mọi người, mọi nơi.",
+  },
+  th: {
+    meta_desc:          "Para Todos (4All) — 15 แอปยูทิลิตี้ออฟไลน์ 100% ใน 26 ภาษา ฟรี ไม่มีการติดตาม",
+    hero_title_1:       "แอปสำหรับ",
+    hero_title_2:       "ทุกคน",
+    hero_subtitle:      "ระบบนิเวศของแอปยูทิลิตี้ออฟไลน์ 100% ที่ให้ความสำคัญกับความเป็นส่วนตัว บัญชีผู้ใช้เป็นทางเลือก ไม่มีโฆษณา ไม่มีการติดตาม",
+    hero_cta:           "ดูแอป",
+    hero_cta2:          "เรียนรู้เพิ่มเติม",
+    badge_offline:      "ออฟไลน์ 100%",
+    badge_languages:    "26 ภาษา",
+    badge_free:         "ฟรีตลอด",
+    why_title:          "สร้างบนสามเสาหลัก",
+    why_privacy_title:  "ความเป็นส่วนตัวโดยการออกแบบ",
+    why_privacy_desc:   "ไม่มีการติดตามที่ซ่อนอยู่ ไม่มีการวัดระยะไกล ข้อมูลของคุณจะคงอยู่ในอุปกรณ์ พร้อมระบบซิงค์คลาวด์ที่เป็นทางเลือก",
+    why_offline_title:  "ทำงานออฟไลน์ได้",
+    why_offline_desc:   "ฟังก์ชันครบถ้วนโดยไม่ต้องใช้อินเทอร์เน็ต การประมวลผลทั้งหมดเกิดขึ้นในเครื่องของคุณ",
+    why_global_title:   "สำหรับทุกคน",
+    why_global_desc:    "แปลครบถ้วนใน 26 ภาษาเพื่อให้ผู้คนทั่วโลกเข้าถึงได้",
+    cat_section_title:  "ระบบนิเวศแอปของเรา",
+    cat_section_sub:    "15 แอปใน 3 หมวดหมู่",
+    cat_productivity:   "ประสิทธิภาพ",
+    cat_productivity_d: "เครื่องมือสำหรับบันทึก รักษาความปลอดภัย และจัดการข้อมูลของคุณ",
+    cat_utilities:      "ยูทิลิตี้",
+    cat_utilities_d:    "เครื่องมือประจำวันสำหรับจัดการไฟล์ มีเดีย และควบคุมอุปกรณ์",
+    cat_time_math:      "เวลาและคณิตศาสตร์",
+    cat_time_math_d:    "เครื่องคิดเลข ตัวจับเวลา ตัวแปลงหน่วย และตัวสร้างแบบสุ่ม",
+    download_apk:       "ดาวน์โหลด APK",
+    stats_apps:         "15 แอป",
+    stats_languages:    "26 ภาษา",
+    stats_offline:      "ออฟไลน์ 100%",
+    footer_tagline:     "แอปสำหรับทุกคน ทุกที่",
+  },
+  bn: {
+    meta_desc:          "Para Todos (4All) — ১৫টি অফলাইন, গোপনীয়তা-কেন্দ্রিক অ্যাপ ২৬টি ভাষায়। বিনামূল্যে। কোন ট্র্যাকিং নেই।",
+    hero_title_1:       "সবার জন্য",
+    hero_title_2:       "অ্যাপস।",
+    hero_subtitle:      "১০০% অফলাইন, গোপনীয়তা-প্রথম ইউটিলিটি অ্যাপের একটি ইকোসিস্টেম। ঐচ্ছিক অ্যাকাউন্ট। কোন বিজ্ঞাপন নেই। কোন ট্র্যাকিং নেই।",
+    hero_cta:           "অ্যাপস এক্সপ্লোর করুন",
+    hero_cta2:          "আরও জানুন",
+    badge_offline:      "১০০% অফলাইন",
+    badge_languages:    "২৬টি ভাষা",
+    badge_free:         "সর্বদা বিনামূল্যে",
+    why_title:          "তিনটি স্তম্ভের উপর নির্মিত",
+    why_privacy_title:  "ডিজাইন দ্বারা গোপনীয়তা",
+    why_privacy_desc:   "কোন লুকানো ট্র্যাকিং, কোন টেলিমেট্রি নেই। আপনার ডেটা আপনার ডিভাইসেই থাকে, ঐচ্ছিক ক্লাউড সিঙ্ক সহ।",
+    why_offline_title:  "অফলাইনে কাজ করে",
+    why_offline_desc:   "ইন্টারনেট ছাড়াই সম্পূর্ণ কার্যকারিতা। সমস্ত প্রসেসিং স্থানীয়ভাবে আপনার ডিভাইসের CPU-তে হয়।",
+    why_global_title:   "সবার জন্য",
+    why_global_desc:    "বিশ্বব্যাপী মানুষের জন্য ২৬টি ভাষায় সম্পূর্ণরূপে স্থানীয়করণ করা হয়েছে।",
+    cat_section_title:  "আমাদের অ্যাপ ইকোসিস্টেম",
+    cat_section_sub:    "তিনটি বিভাগে সাজানো ১৫টি অ্যাপ",
+    cat_productivity:   "উৎপাদনশীলতা",
+    cat_productivity_d: "আপনার তথ্য ক্যাপচার, সুরক্ষিত এবং পরিচালনা করার সরঞ্জাম।",
+    cat_utilities:      "ইউটিলিটি",
+    cat_utilities_d:    "ফাইল পরিচালনা, মিডিয়া এবং ডিভাইস নিয়ন্ত্রণের জন্য দৈনন্দিন সরঞ্জাম।",
+    cat_time_math:      "সময় এবং গণিত",
+    cat_time_math_d:    "ক্যালকুলেটর, টাইমার, রূপান্তরকারী এবং র্যান্ডমাইজার।",
+    download_apk:       "APK ডাউনলোড করুন",
+    stats_apps:         "১৫টি অ্যাপ",
+    stats_languages:    "২৬টি ভাষা",
+    stats_offline:      "১০০% অফলাইন",
+    footer_tagline:     "সবার জন্য, সব জায়গায় অ্যাপস।",
+  },
+  fil: {
+    meta_desc:          "Para Todos (4All) — 15 na offline, privacy-first utility app sa 26 na wika. Libre. Walang tracking.",
+    hero_title_1:       "Mga App para sa",
+    hero_title_2:       "Lahat.",
+    hero_subtitle:      "Isang lumalaking ecosystem ng 100% offline, privacy-first utility app. Opsyonal na account. Walang ad. Walang tracking.",
+    hero_cta:           "Tuklasin ang mga App",
+    hero_cta2:          "Alamin pa",
+    badge_offline:      "100% Offline",
+    badge_languages:    "26 na Wika",
+    badge_free:         "Palaging Libre",
+    why_title:          "Itinayo sa tatlong haligi",
+    why_privacy_title:  "Privacy by Design",
+    why_privacy_desc:   "Walang nakatagong tracking, walang telemetry. Ang iyong data ay nananatili sa iyong device, may opsyonal na cloud sync.",
+    why_offline_title:  "Gumagana Offline",
+    why_offline_desc:   "Buong functionality nang walang internet. Ang lahat ng pagpoproseso ay nangyayari sa iyong device CPU.",
+    why_global_title:   "Para sa Lahat",
+    why_global_desc:    "Ganap na isinalin sa 26 na wika, idinisenyo upang magamit ng mga tao sa buong mundo.",
+    cat_section_title:  "Ang Aming App Ecosystem",
+    cat_section_sub:    "15 app na inayos sa tatlong kategorya",
+    cat_productivity:   "Produktibidad",
+    cat_productivity_d: "Mga tool para makuha, maprotektahan, at pamahalaan ang iyong impormasyon.",
+    cat_utilities:      "Mga Utility",
+    cat_utilities_d:    "Mga pang-araw-araw na tool para sa file management, media, at device control.",
+    cat_time_math:      "Oras at Sipnayan",
+    cat_time_math_d:    "Mga calculator, timer, converter, at randomizer.",
+    download_apk:       "I-download ang APK",
+    stats_apps:         "15 App",
+    stats_languages:    "26 na Wika",
+    stats_offline:      "100% Offline",
+    footer_tagline:     "Mga app para sa lahat, kahit saan.",
+  },
+  sw: {
+    meta_desc:          "Para Todos (4All) — Programu 15 za nje ya mtandao katika lugha 26. Bure. Hakuna kufuatiliwa.",
+    hero_title_1:       "Programu za",
+    hero_title_2:       "Kila mtu.",
+    hero_subtitle:      "Mfumo wa programu 100% nje ya mtandao, zinazojali faragha. Akaunti za hiari. Hakuna matangazo. Hakuna kufuatiliwa.",
+    hero_cta:           "Gundua Programu",
+    hero_cta2:          "Jifunze zaidi",
+    badge_offline:      "100% Nje ya Mtandao",
+    badge_languages:    "Lugha 26",
+    badge_free:         "Bure Daima",
+    why_title:          "Imejengwa kwenye nguzo tatu",
+    why_privacy_title:  "Faragha kama Msingi",
+    why_privacy_desc:   "Hakuna ufuatiliaji uliofichwa, hakuna telemetry. Data yako inabaki kwenye kifaa chako, na usawazishaji wa hiari wa wingu.",
+    why_offline_title:  "Hufanya Kazi Nje ya Mtandao",
+    why_offline_desc:   "Utendaji kamili bila mtandao. Uchakataji wote hufanyika kwenye CPU ya kifaa chako.",
+    why_global_title:   "Kwa Kila mtu",
+    why_global_desc:    "Imetafsiriwa kikamilifu katika lugha 26, ili ipatikane kwa watu ulimwenguni kote.",
+    cat_section_title:  "Mfumo wetu wa Programu",
+    cat_section_sub:    "Programu 15 katika kategoria tatu",
+    cat_productivity:   "Tija",
+    cat_productivity_d: "Zana za kunasa, kulinda na kudhibiti maelezo yako.",
+    cat_utilities:      "Huduma",
+    cat_utilities_d:    "Zana za kila siku za kudhibiti faili, vyombo vya habari na kifaa.",
+    cat_time_math:      "Muda na Hesabu",
+    cat_time_math_d:    "Vikokotoo, vipima muda, vibadilishaji na viteuzi nasibu.",
+    download_apk:       "Pakua APK",
+    stats_apps:         "Programu 15",
+    stats_languages:    "Lugha 26",
+    stats_offline:      "100% Nje ya Mtandao",
+    footer_tagline:     "Programu za kila mtu, kila mahali.",
+  },
+  ha: {
+    meta_desc:          "Para Todos (4All) — Aikace-aikace 15 na layi 100% a cikin harsuna 26. Kyauta. Babu bin diddigi.",
+    hero_title_1:       "Apps don",
+    hero_title_2:       "Kowa.",
+    hero_subtitle:      "Tsarin apps na layi 100%, mai ba da fifiko ga sirri. Asusu na zaɓi. Babu tallace-tallace. Babu bin diddigi.",
+    hero_cta:           "Bincika Apps",
+    hero_cta2:          "Ƙara koyo",
+    badge_offline:      "100% Ba tare da Intanet ba",
+    badge_languages:    "Harsuna 26",
+    badge_free:         "Kyauta Kullum",
+    why_title:          "An gina akan ginshiƙai uku",
+    why_privacy_title:  "Sirri ta Design",
+    why_privacy_desc:   "Babu bin diddigin boye, babu telemetry. Bayanan ku suna zama a kan na'urarku, tare da raba gajimare na zaɓi.",
+    why_offline_title:  "Yana aiki ba tare da intanet ba",
+    why_offline_desc:   "Cikakken aiki ba tare da intanet ba. Duk aikin yana gudana a cikin CPU na na'urarku.",
+    why_global_title:   "Don Kowa",
+    why_global_desc:    "Fassarar cikakkiya a cikin harsuna 26 don isa ga mutane a duk faɗin duniya.",
+    cat_section_title:  "Tsarin mu na Apps",
+    cat_section_sub:    "Apps 15 a cikin rukuni uku",
+    cat_productivity:   "Haɓakawa",
+    cat_productivity_d: "Kayan aiki don ɗauka, kiyayewa, da sarrafa bayanan ku.",
+    cat_utilities:      "Kayan aiki",
+    cat_utilities_d:    "Kayan aikin yau da kullun don fayiloli, kafofin watsa labarai, da sarrafa na'ura.",
+    cat_time_math:      "Lokaci & Lissafi",
+    cat_time_math_d:    "Kalkuleta, masu auna lokaci, masu sauyawa, da masu zaɓin bazuwar.",
+    download_apk:       "Zazzage APK",
+    stats_apps:         "Apps 15",
+    stats_languages:    "Harsuna 26",
+    stats_offline:      "100% Layi",
+    footer_tagline:     "Apps don kowa, ko'ina.",
+  },
+  ms: {
+    meta_desc:          "Para Todos (4All) — 15 aplikasi utiliti luar talian 100% dalam 26 bahasa. Percuma. Tiada penjejakan.",
+    hero_title_1:       "Aplikasi untuk",
+    hero_title_2:       "Semua.",
+    hero_subtitle:      "Ekosistem aplikasi 100% luar talian yang mengutamakan privasi. Akaun pilihan. Tiada iklan. Tiada penjejakan.",
+    hero_cta:           "Terokai Aplikasi",
+    hero_cta2:          "Ketahui lebih lanjut",
+    badge_offline:      "100% Luar Talian",
+    badge_languages:    "26 Bahasa",
+    badge_free:         "Sentiasa Percuma",
+    why_title:          "Dibina di atas tiga tonggak",
+    why_privacy_title:  "Privasi oleh Reka Bentuk",
+    why_privacy_desc:   "Tiada penjejakan tersembunyi, tiada telemetri. Data anda kekal pada peranti anda, dengan penyegerakan awan pilihan.",
+    why_offline_title:  "Berfungsi Luar Talian",
+    why_offline_desc:   "Fungsi penuh tanpa internet. Semua pemprosesan berlaku secara tempatan pada CPU peranti anda.",
+    why_global_title:   "Untuk Semua",
+    why_global_desc:    "Diterjemahkan sepenuhnya dalam 26 bahasa agar boleh diakses oleh orang di seluruh dunia.",
+    cat_section_title:  "Ekosistem Aplikasi Kami",
+    cat_section_sub:    "15 aplikasi dianjurkan ke dalam tiga kategori",
+    cat_productivity:   "Produktiviti",
+    cat_productivity_d: "Alat untuk menangkap, menjamin, dan mengurus maklumat anda.",
+    cat_utilities:      "Utiliti",
+    cat_utilities_d:    "Alat harian untuk pengurusan fail, media, dan kawalan peranti.",
+    cat_time_math:      "Masa & Matematik",
+    cat_time_math_d:    "Kalkulator, pemasa, penukar, dan rawak.",
+    download_apk:       "Muat turun APK",
+    stats_apps:         "15 Aplikasi",
+    stats_languages:    "26 Bahasa",
+    stats_offline:      "100% Luar Talian",
+    footer_tagline:     "Aplikasi untuk semua orang, di mana sahaja.",
+  },
+  uk: {
+    meta_desc:          "Para Todos (4All) — 15 офлайн-утиліт на 26 мовах. Безкоштовно. Без відстеження.",
+    hero_title_1:       "Програми для",
+    hero_title_2:       "всіх.",
+    hero_subtitle:      "Екосистема 100% офлайн-програм, орієнтована на конфіденційність. Облікові записи за бажанням. Без реклами. Без відстеження.",
+    hero_cta:           "Переглянути програми",
+    hero_cta2:          "Дізнатися більше",
+    badge_offline:      "100% Офлайн",
+    badge_languages:    "26 Мов",
+    badge_free:         "Завжди безкоштовно",
+    why_title:          "Створено на трьох принципах",
+    why_privacy_title:  "Конфіденційність за дизайном",
+    why_privacy_desc:   "Жодного прихованого відстеження або телеметрії. Ваші дані залишаються на пристрої, хмарна синхронізація опціональна.",
+    why_offline_title:  "Працює офлайн",
+    why_offline_desc:   "Повна функціональність без інтернету. Уся обробка відбувається локально на вашому CPU.",
+    why_global_title:   "Для всіх",
+    why_global_desc:    "Повністю локалізовано на 26 мовах для доступу по всьому світу.",
+    cat_section_title:  "Наша екосистема програм",
+    cat_section_sub:    "15 програм у трьох категоріях",
+    cat_productivity:   "Продуктивність",
+    cat_productivity_d: "Інструменти для збереження, захисту та управління інформацією.",
+    cat_utilities:      "Утиліти",
+    cat_utilities_d:    "Щоденні інструменти для управління файлами, медіа та пристроєм.",
+    cat_time_math:      "Час і математика",
+    cat_time_math_d:    "Калькулятори, таймери, конвертери та генератори.",
+    download_apk:       "Завантажити APK",
+    stats_apps:         "15 Програм",
+    stats_languages:    "26 Мов",
+    stats_offline:      "100% Офлайн",
+    footer_tagline:     "Програми для всіх і всюди.",
+  },
+  ta: {
+    meta_desc:          "Para Todos (4All) — 26 மொழிகளில் 15 ஆஃப்லைன் பயன்பாடுகள். இலவசம். கண்காணிப்பு இல்லை.",
+    hero_title_1:       "அனைவருக்கும்",
+    hero_title_2:       "பயன்பாடுகள்.",
+    hero_subtitle:      "100% ஆஃப்லைன், தனியுரிமைக்கு முன்னுரிமை தரும் பயன்பாடுகளின் சுற்றுச்சூழல். கணக்குகள் விருப்பமானவை. விளம்பரங்கள் இல்லை.",
+    hero_cta:           "பயன்பாடுகளை ஆராயுங்கள்",
+    hero_cta2:          "மேலும் அறிய",
+    badge_offline:      "100% ஆஃப்லைன்",
+    badge_languages:    "26 மொழிகள்",
+    badge_free:         "எப்பொழுதும் இலவசம்",
+    why_title:          "மூன்று தூண்களில் கட்டமைக்கப்பட்டது",
+    why_privacy_title:  "வடிவமைப்பால் தனியுரிமை",
+    why_privacy_desc:   "கண்காணிப்பு இல்லை. உங்கள் தரவு உங்கள் சாதனத்திலேயே இருக்கும், கிளவுட் ஒத்திசைவு விருப்பத்திற்குரியது.",
+    why_offline_title:  "ஆஃப்லைனில் வேலை செய்யும்",
+    why_offline_desc:   "இணையம் இல்லாமல் முழு செயல்பாடு. அனைத்தும் உங்கள் சாதனத்தில் நடக்கும்.",
+    why_global_title:   "அனைவருக்கும்",
+    why_global_desc:    "உலகெங்கிலும் உள்ளவர்களுக்காக 26 மொழிகளில் மொழிபெயர்க்கப்பட்டுள்ளது.",
+    cat_section_title:  "எங்கள் பயன்பாடுகள்",
+    cat_section_sub:    "மூன்று வகைகளில் 15 பயன்பாடுகள்",
+    cat_productivity:   "உற்பத்தித்திறன்",
+    cat_productivity_d: "தகவல்களைச் சேமிக்க, பாதுகாக்க மற்றும் நிர்வகிக்க கருவிகள்.",
+    cat_utilities:      "பயன்பாடுகள்",
+    cat_utilities_d:    "கோப்பு மேலாண்மை, ஊடகம் மற்றும் சாதன கட்டுப்பாட்டுக்கான தினசரி கருவிகள்.",
+    cat_time_math:      "நேரம் & கணிதம்",
+    cat_time_math_d:    "கால்குலேட்டர்கள், டைமர்கள், மாற்றிகள் மற்றும் ரேண்டமைசர்கள்.",
+    download_apk:       "APK ஐ பதிவிறக்குக",
+    stats_apps:         "15 பயன்பாடுகள்",
+    stats_languages:    "26 மொழிகள்",
+    stats_offline:      "100% ஆஃப்லைன்",
+    footer_tagline:     "எங்கும் அனைவருக்கும் பயன்பாடுகள்.",
+  },
+  te: {
+    meta_desc:          "Para Todos (4All) — 26 భాషల్లో 15 ఆఫ్‌లైన్ యాప్‌లు. ఉచితం. ట్రాకింగ్ లేదు.",
+    hero_title_1:       "అందరి కోసం",
+    hero_title_2:       "యాప్‌లు.",
+    hero_subtitle:      "100% ఆఫ్‌లైన్, గోప్యతకు ప్రాధాన్యత ఇచ్చే యాప్‌ల సిస్టమ్. అకౌంట్లు ఐచ్ఛికం. ప్రకటనలు లేవు.",
+    hero_cta:           "యాప్‌లను చూడండి",
+    hero_cta2:          "మరింత తెలుసుకోండి",
+    badge_offline:      "100% ఆఫ్‌లైన్",
+    badge_languages:    "26 భాషలు",
+    badge_free:         "ఎల్లప్పుడూ ఉచితం",
+    why_title:          "మూడు మూలస్తంభాలపై నిర్మించబడింది",
+    why_privacy_title:  "డిజైన్ ద్వారా గోప్యత",
+    why_privacy_desc:   "ట్రాకింగ్ లేదు. మీ డేటా మీ పరికరంలోనే ఉంటుంది, క్లౌడ్ సింక్ ఐచ్ఛికం.",
+    why_offline_title:  "ఆఫ్‌లైన్‌లో పని చేస్తుంది",
+    why_offline_desc:   "ఇంటర్నెట్ లేకుండా పూర్తి కార్యాచరణ. అంతా మీ పరికరంలో జరుగుతుంది.",
+    why_global_title:   "అందరి కోసం",
+    why_global_desc:    "ప్రపంచవ్యాప్తంగా ఉన్న వ్యక్తుల కోసం 26 భాషల్లో అనువదించబడింది.",
+    cat_section_title:  "మా యాప్‌ల సిస్టమ్",
+    cat_section_sub:    "మూడు కేటగిరీలలో 15 యాప్‌లు",
+    cat_productivity:   "ఉత్పాదకత",
+    cat_productivity_d: "సమాచారాన్ని సేవ్ చేయడానికి, భద్రపరచడానికి మరియు నిర్వహించడానికి సాధనాలు.",
+    cat_utilities:      "ఉపయోగాలు",
+    cat_utilities_d:    "ఫైల్ నిర్వహణ, మీడియా మరియు పరికర నియంత్రణ కోసం రోజువారీ సాధనాలు.",
+    cat_time_math:      "సమయం & గణితం",
+    cat_time_math_d:    "క్యాలిక్యులేటర్లు, టైమర్లు, కన్వర్టర్లు మరియు రాండమైజర్లు.",
+    download_apk:       "APK డౌన్‌లోడ్ చేయండి",
+    stats_apps:         "15 యాప్‌లు",
+    stats_languages:    "26 భాషలు",
+    stats_offline:      "100% ఆఫ్‌లైన్",
+    footer_tagline:     "ఎక్కడైనా అందరి కోసం యాప్‌లు.",
+  },
+  mr: {
+    meta_desc:          "Para Todos (4All) — 26 भाषांमध्ये 15 ऑफलाइन अ‍ॅप्स. मोफत. ट्रॅकिंग नाही.",
+    hero_title_1:       "सर्वांसाठी",
+    hero_title_2:       "अ‍ॅप्स.",
+    hero_subtitle:      "100% ऑफलाइन, गोपनीयतेला प्राधान्य देणारी अ‍ॅप्स. खाती ऐच्छिक आहेत. जाहिराती नाहीत.",
+    hero_cta:           "अ‍ॅप्स पहा",
+    hero_cta2:          "अधिक जाणून घ्या",
+    badge_offline:      "100% ऑफलाइन",
+    badge_languages:    "26 भाषा",
+    badge_free:         "नेहमी मोफत",
+    why_title:          "तीन स्तंभांवर आधारित",
+    why_privacy_title:  "गोपनीयतेला प्राधान्य",
+    why_privacy_desc:   "कोणतेही ट्रॅकिंग नाही. तुमचा डेटा तुमच्या डिव्हाइसवरच राहतो, क्लाउड सिंक ऐच्छिक आहे.",
+    why_offline_title:  "ऑफलाइन चालते",
+    why_offline_desc:   "इंटरनेटशिवाय पूर्ण कार्यक्षमता. सर्व प्रक्रिया तुमच्या डिव्हाइसवर होते.",
+    why_global_title:   "सर्वांसाठी",
+    why_global_desc:    "जगभरातील लोकांसाठी 26 भाषांमध्ये भाषांतरित केले आहे.",
+    cat_section_title:  "आमची अ‍ॅप्स",
+    cat_section_sub:    "तीन श्रेणींमध्ये 15 अ‍ॅप्स",
+    cat_productivity:   "उत्पादकता",
+    cat_productivity_d: "माहिती जतन, सुरक्षित आणि व्यवस्थापित करण्यासाठी साधने.",
+    cat_utilities:      "उपयुक्तता",
+    cat_utilities_d:    "फाइल व्यवस्थापन, मीडिया आणि डिव्हाइस नियंत्रणासाठी साधने.",
+    cat_time_math:      "वेळ आणि गणित",
+    cat_time_math_d:    "कॅल्क्युलेटर, टायमर, कन्व्हर्टर आणि रँडमायझर्स.",
+    download_apk:       "APK डाउनलोड करा",
+    stats_apps:         "15 अ‍ॅप्स",
+    stats_languages:    "26 भाषा",
+    stats_offline:      "100% ऑफलाइन",
+    footer_tagline:     "सर्वांसाठी, सर्वत्र अ‍ॅप्स.",
+  }
+
+};
+
+// Fallback to English
+const t = (translations as Record<string, typeof translations.en>)[lang] ?? translations.en;
+
+// ─────────────────────────────────────────────
+//  App data from appsData.ts with localized summary
+// ─────────────────────────────────────────────
+const isEs = lang === 'es';
+const appsMap = new Map(APPS_DATA.map(a => [a.slug, a]));
+
+const productivityApps = [
+  { slug: "apuntes-4all",           emoji: "📝" },
+  { slug: "seguridad-4all",         emoji: "🔐" },
+  { slug: "pdf-4all",               emoji: "📄" },
+  { slug: "docs-4all",              emoji: "📊" },
+  { slug: "notas-voz-4all",         emoji: "🎙️" },
+].map(item => {
+  const data = appsMap.get(item.slug)!;
+  return {
+    ...item,
+    name: data.name,
+    iconUrl: data.iconUrl,
+    desc: isEs ? data.summary.es : data.summary.en,
+    hasAccountOption: data.hasAccountOption,
+    accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
+  };
+});
+
+const utilitiesApps = [
+  { slug: "qr-4all",                 emoji: "📷" },
+  { slug: "zip-4all",                emoji: "🗜️" },
+  { slug: "fotos-ligeras-4all",      emoji: "🖼️" },
+  { slug: "lupa-4all",               emoji: "🔦" },
+  { slug: "reproductor-4all",        emoji: "🎵" },
+].map(item => {
+  const data = appsMap.get(item.slug)!;
+  return {
+    ...item,
+    name: data.name,
+    iconUrl: data.iconUrl,
+    desc: isEs ? data.summary.es : data.summary.en,
+    hasAccountOption: data.hasAccountOption,
+    accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
+  };
+});
+
+const timeMathApps = [
+  { slug: "enfoque-4all",            emoji: "⏱️" },
+  { slug: "cuentas-4all",            emoji: "🧾" },
+  { slug: "medidas-4all",            emoji: "📐" },
+  { slug: "azar-4all",               emoji: "🎲" },
+  { slug: "festivos-4all",           emoji: "📅" },
+].map(item => {
+  const data = appsMap.get(item.slug)!;
+  return {
+    ...item,
+    name: data.name,
+    iconUrl: data.iconUrl,
+    desc: isEs ? data.summary.es : data.summary.en,
+    hasAccountOption: data.hasAccountOption,
+    accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
+  };
+});
+
+const apkBase = "https://github.com/RedStabros/apps-4all/releases/latest";
+---
+
+<Layout title={`${t.hero_title_1} ${t.hero_title_2} — 4All`} description={t.meta_desc} lang={lang}>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!--  SECTION 1: HERO                            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden aurora-bg transition-colors duration-300">
+    <!-- Dot pattern overlay -->
+    <div class="absolute inset-0 dot-pattern pointer-events-none opacity-50 dark:opacity-40"></div>
+
+    <!-- Radial glow accents -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-teal-500/10 dark:bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 right-1/3 w-64 h-64 bg-amber-500/10 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+      <!-- Eyebrow badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/5 dark:bg-white/10 backdrop-blur-sm border border-zinc-900/10 dark:border-white/20 text-zinc-700 dark:text-white/80 text-sm font-medium mb-8 animate-fade-in">
+        <span class="w-2 h-2 rounded-full bg-teal-500 dark:bg-teal-400 animate-pulse"></span>
+        4All Ecosystem · 2026
+      </div>
+
+      <!-- Main headline -->
+      <h1 class="text-5xl sm:text-7xl lg:text-8xl font-extrabold text-zinc-900 dark:text-white leading-[1.05] tracking-tight mb-6 animate-fade-in">
+        {t.hero_title_1}<br />
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-teal-500 to-amber-500 dark:from-blue-400 dark:via-teal-300 dark:to-amber-300">
+          {t.hero_title_2}
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg sm:text-xl text-zinc-600 dark:text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in">
+        {t.hero_subtitle}
+      </p>
+
+      <!-- Feature badges -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-10 animate-fade-in">
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-white/10 backdrop-blur-sm border border-zinc-200 dark:border-white/20 rounded-full text-zinc-800 dark:text-white text-sm font-semibold shadow-sm">
+          <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M6.343 6.343a9 9 0 000 12.728M9.172 9.172a5 5 0 000 7.071M12 12h.01" /></svg>
+          {t.badge_offline}
+        </span>
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-white/10 backdrop-blur-sm border border-zinc-200 dark:border-white/20 rounded-full text-zinc-800 dark:text-white text-sm font-semibold shadow-sm">
+          <svg class="w-4 h-4 text-primary dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+          {t.badge_languages}
+        </span>
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-white/10 backdrop-blur-sm border border-zinc-200 dark:border-white/20 rounded-full text-zinc-800 dark:text-white text-sm font-semibold shadow-sm">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {t.badge_free}
+        </span>
+      </div>
+
+      <!-- CTAs -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
+        <a
+          href="#apps"
+          id="hero-cta-primary"
+          class="inline-flex items-center gap-2 px-8 py-3.5 bg-primary hover:bg-blue-700 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-2xl text-base transition-all duration-200 active:scale-95 shadow-xl"
+        >
+          {t.hero_cta}
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </a>
+        <a
+          href="#why"
+          id="hero-cta-secondary"
+          class="inline-flex items-center gap-2 px-8 py-3.5 bg-white/80 hover:bg-white dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur-sm text-zinc-800 dark:text-white font-semibold rounded-2xl text-base border border-zinc-200 dark:border-white/20 transition-all duration-200 active:scale-95 shadow-sm"
+        >
+          {t.hero_cta2}
+        </a>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-zinc-400 dark:text-white/40 animate-bounce">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!--  SECTION 2: PHILOSOPHY (WHY 4ALL)           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="why" class="py-24 bg-white dark:bg-zinc-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section header -->
+      <div class="text-center mb-16 reveal">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white mb-4">
+          {t.why_title}
+        </h2>
+      </div>
+
+      <!-- 3 Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Privacy -->
+        <div class="reveal reveal-delay-1 flex flex-col items-center text-center p-8 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-blue-200 dark:hover:border-blue-800 transition-colors duration-300 group">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-3">{t.why_privacy_title}</h3>
+          <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed text-sm">{t.why_privacy_desc}</p>
+        </div>
+
+        <!-- Offline -->
+        <div class="reveal reveal-delay-2 flex flex-col items-center text-center p-8 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-teal-200 dark:hover:border-teal-800 transition-colors duration-300 group">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M6.343 6.343a9 9 0 000 12.728M9.172 9.172a5 5 0 000 7.071M12 12h.01" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-3">{t.why_offline_title}</h3>
+          <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed text-sm">{t.why_offline_desc}</p>
+        </div>
+
+        <!-- Global -->
+        <div class="reveal reveal-delay-3 flex flex-col items-center text-center p-8 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-amber-200 dark:hover:border-amber-800 transition-colors duration-300 group">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-3">{t.why_global_title}</h3>
+          <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed text-sm">{t.why_global_desc}</p>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="mt-16 reveal grid grid-cols-3 gap-4 p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+        <div class="text-center">
+          <div class="text-3xl font-extrabold text-primary dark:text-primary-dark mb-1">{t.stats_apps}</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-widest">Apps</div>
+        </div>
+        <div class="text-center border-x border-zinc-200 dark:border-zinc-800">
+          <div class="text-3xl font-extrabold text-teal-600 dark:text-teal-400 mb-1">{t.stats_languages}</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-widest">Languages</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mb-1">{t.stats_offline}</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-widest">Offline</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!--  SECTION 3+4: CATEGORIES + APP GRID         -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="apps" class="py-24 bg-zinc-50 dark:bg-zinc-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Section header -->
+      <div class="text-center mb-16 reveal">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white mb-3">
+          {t.cat_section_title}
+        </h2>
+        <p class="text-zinc-500 dark:text-zinc-400">{t.cat_section_sub}</p>
+      </div>
+
+      <!-- ── PRODUCTIVITY ── -->
+      <div class="mb-16">
+        <div class="flex items-center gap-3 mb-8 reveal">
+          <span class="w-3 h-3 rounded-full bg-primary"></span>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white">{t.cat_productivity}</h3>
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">— {t.cat_productivity_d}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {productivityApps.map((app, i) => (
+            <AppCard
+              name={app.name}
+              description={app.desc}
+              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              category="productivity"
+              emoji={app.emoji}
+              iconUrl={app.iconUrl}
+              slug={app.slug}
+              lang={lang}
+              hasAccountOption={app.hasAccountOption}
+              accountBadge={app.accountBadge}
+              index={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      <!-- ── UTILITIES ── -->
+      <div class="mb-16">
+        <div class="flex items-center gap-3 mb-8 reveal">
+          <span class="w-3 h-3 rounded-full bg-teal-600 dark:bg-teal-400"></span>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white">{t.cat_utilities}</h3>
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">— {t.cat_utilities_d}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {utilitiesApps.map((app, i) => (
+            <AppCard
+              name={app.name}
+              description={app.desc}
+              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              category="utilities"
+              emoji={app.emoji}
+              iconUrl={app.iconUrl}
+              slug={app.slug}
+              lang={lang}
+              hasAccountOption={app.hasAccountOption}
+              accountBadge={app.accountBadge}
+              index={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      <!-- ── TIME & MATH ── -->
+      <div>
+        <div class="flex items-center gap-3 mb-8 reveal">
+          <span class="w-3 h-3 rounded-full bg-amber-600 dark:bg-amber-400"></span>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-white">{t.cat_time_math}</h3>
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">— {t.cat_time_math_d}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {timeMathApps.map((app, i) => (
+            <AppCard
+              name={app.name}
+              description={app.desc}
+              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              category="time-math"
+              emoji={app.emoji}
+              iconUrl={app.iconUrl}
+              slug={app.slug}
+              lang={lang}
+              hasAccountOption={app.hasAccountOption}
+              accountBadge={app.accountBadge}
+              index={i}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+</Layout>

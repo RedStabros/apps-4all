@@ -1,0 +1,7 @@
+{
+  "name": "@apps4all/audio-engine",
+  "version": "1.0.0",
+  "description": "High-performance C++ Audio Engine with Google Oboe and AMediaCodec hardware decoding",
+  "main": "index.ts",
+  "private": true
+}

@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Lupa y Linterna 4All",
+    "slug": "lupa-4all",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.apps4all.lupa4all",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Usa la cámara trasera como lupa digital de alto contraste y linterna.",
+        "NSPhotoLibraryAddUsageDescription": "Guarda en tu galería las capturas congeladas que decidas conservar."
+      }
+    },
+    "android": {
+      "package": "com.apps4all.lupa4all",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Lupa 4All to access your camera to magnify."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Lupa 4All to save magnified captures to your photos.",
+          "savePhotosPermission": "Allow Lupa 4All to save magnified captures to your photos."
+        }
+      ]
+    ],
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    }
+  }
+}
