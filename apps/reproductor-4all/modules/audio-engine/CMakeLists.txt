@@ -20,7 +20,6 @@ target_include_directories(audioengine PUBLIC
 target_link_libraries(audioengine
     oboe::oboe
     mediandk
-    aaudio
     OpenSLES
     android
     log

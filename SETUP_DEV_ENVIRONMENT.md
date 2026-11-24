@@ -123,3 +123,4 @@ pnpm build
 2. **Expo SDK 57 (`expo-file-system`):** usar siempre `import * as FileSystem from "expo-file-system/legacy"` cuando se utilicen `documentDirectory`, `cacheDirectory`, `readAsStringAsync`, `writeAsStringAsync`, `moveAsync` o `deleteAsync`.
 3. **Android Auto (`apps/reproductor-4all`):** el servicio `AudioPlaybackService.kt` hereda de `MediaBrowserServiceCompat` y el plugin `plugins/withAudioEngine.js` inyecta `@xml/automotive_app_desc`. Para probar APKs instalados por fuera de Play Store en un carro, activar *"Fuentes desconocidas"* en los Ajustes de desarrollador de Android Auto en el teléfono.
 4. **iOS (futuro en macOS):** requiere macOS + Xcode 16+ + CocoaPods (`pod install`). Todas las apps ya incluyen `ios.infoPlist`, iconos opacos `1024×1024` y guardas `Platform.OS`.
+

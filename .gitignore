@@ -25,10 +25,13 @@ credentials.json
 release-signing.properties
 local.properties
 
-# Native build outputs
+# Native build outputs & Expo prebuild generated folders
 *.apk
 *.aab
 *.ipa
+apps/*/android/
+apps/*/ios/
+.cxx/
 android/app/build/
 android/.gradle/
 ios/build/

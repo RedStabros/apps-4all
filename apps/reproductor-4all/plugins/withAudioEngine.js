@@ -98,24 +98,8 @@ module.exports = function withAudioEngine(config) {
     },
   ]);
 
-  // 3. Settings Gradle: Incluir el módulo C++/Kotlin local
-  config = withSettingsGradle(config, (config) => {
-    if (!config.modResults.contents.includes("':audio-engine'")) {
-      config.modResults.contents += `\ninclude ':audio-engine'\nproject(':audio-engine').projectDir = new File(rootProject.projectDir, '../modules/audio-engine/android')\n`;
-    }
-    return config;
-  });
-
-  // 4. App Build Gradle: Vincular la dependencia al compilador de Android
-  config = withAppBuildGradle(config, (config) => {
-    if (!config.modResults.contents.includes("project(':audio-engine')")) {
-      config.modResults.contents = config.modResults.contents.replace(
-        /dependencies\s*\{/,
-        `dependencies {\n    implementation project(':audio-engine')`,
-      );
-    }
-    return config;
-  });
+  // Nota: modules/audio-engine ya es autolinked automáticamente por Expo Modules como :apps4all_audio-engine.
+  // No se debe agregar manualmente en settings.gradle / build.gradle para evitar doble compilación.
 
   return config;
 };

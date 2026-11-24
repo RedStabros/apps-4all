@@ -2,7 +2,7 @@ const { withAppBuildGradle } = require("@expo/config-plugins");
 
 /**
  * Expo Config Plugin: withReleaseSigning
- * Inyecta automáticamente el bloque de firmas de producción (signingConfigs.release)
+ * Inyecta automÃ¡ticamente el bloque de firmas de producciÃ³n (signingConfigs.release)
  * y la regla de fallo estricta en android/app/build.gradle durante "expo prebuild".
  */
 module.exports = function withReleaseSigning(config) {
@@ -24,13 +24,13 @@ module.exports = function withReleaseSigning(config) {
             def keystorePath = System.getenv("RELEASE_KEYSTORE_PATH") ?: project.findProperty("RELEASE_KEYSTORE_PATH")
             def keystoreAlias = System.getenv("RELEASE_KEY_ALIAS") ?: project.findProperty("RELEASE_KEY_ALIAS")
             def keystorePassword = System.getenv("RELEASE_STORE_PASSWORD") ?: project.findProperty("RELEASE_STORE_PASSWORD")
-            def keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: project.findProperty("RELEASE_KEY_PASSWORD")
+            def releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: project.findProperty("RELEASE_KEY_PASSWORD")
 
             if (keystorePath && file(keystorePath).exists()) {
                 storeFile file(keystorePath)
                 storePassword keystorePassword
                 keyAlias keystoreAlias
-                keyPassword keyPassword
+                keyPassword releaseKeyPassword
             } else {
                 println "ALERTA DE SEGURIDAD 4ALL: Credenciales de firma de release no localizadas en el entorno."
             }
@@ -45,13 +45,13 @@ module.exports = function withReleaseSigning(config) {
             def keystorePath = System.getenv("RELEASE_KEYSTORE_PATH") ?: project.findProperty("RELEASE_KEYSTORE_PATH")
             def keystoreAlias = System.getenv("RELEASE_KEY_ALIAS") ?: project.findProperty("RELEASE_KEY_ALIAS")
             def keystorePassword = System.getenv("RELEASE_STORE_PASSWORD") ?: project.findProperty("RELEASE_STORE_PASSWORD")
-            def keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: project.findProperty("RELEASE_KEY_PASSWORD")
+            def releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: project.findProperty("RELEASE_KEY_PASSWORD")
 
             if (keystorePath && file(keystorePath).exists()) {
                 storeFile file(keystorePath)
                 storePassword keystorePassword
                 keyAlias keystoreAlias
-                keyPassword keyPassword
+                keyPassword releaseKeyPassword
             } else {
                 println "ALERTA DE SEGURIDAD 4ALL: Credenciales de firma de release no localizadas en el entorno."
             }
@@ -64,20 +64,20 @@ module.exports = function withReleaseSigning(config) {
     if (contents.includes("buildTypes {") && contents.includes("release {")) {
       if (!contents.includes("signingConfig signingConfigs.release")) {
         contents = contents.replace(
-          /release\s*\{([\s\S]*?)(signingConfig\s+signingConfigs\.\w+)?/,
-          (match, p1) => `release {${p1}signingConfig signingConfigs.release`
+          /(buildTypes\s*\{[\s\S]*?release\s*\{[\s\S]*?)signingConfig\s+signingConfigs\.debug/,
+          "$1signingConfig signingConfigs.release"
         );
       }
     }
 
-    // 3. Inyectar regla de fallo estricta en compilaciones de producción
+    // 3. Inyectar regla de fallo estricta en compilaciones de producciÃ³n
     const safetyCheck = `
-// REGLA DE SEGURIDAD 4ALL: Fallo estricto si se intenta compilar release sin keystore de producción
+// REGLA DE SEGURIDAD 4ALL: Fallo estricto si se intenta compilar release sin keystore de producciÃ³n
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.hasTask(":app:assembleRelease") || taskGraph.hasTask(":app:bundleRelease")) {
         def keystorePath = System.getenv("RELEASE_KEYSTORE_PATH") ?: project.findProperty("RELEASE_KEYSTORE_PATH")
         if (!keystorePath || !file(keystorePath).exists()) {
-            throw new GradleException("ERROR CRÍTICO DE SEGURIDAD: Intentando compilar release sin RELEASE_KEYSTORE_PATH válido.")
+            throw new GradleException("ERROR CRÃTICO DE SEGURIDAD: Intentando compilar release sin RELEASE_KEYSTORE_PATH vÃ¡lido.")
         }
     }
 }
