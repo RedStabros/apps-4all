@@ -8,9 +8,15 @@ import {
   Alert,
   Linking,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsFocused } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
-import { Camera, CameraView, BarcodeType } from "expo-camera";
+import {
+  CameraView,
+  BarcodeType,
+  useCameraPermissions,
+  scanFromURLAsync,
+} from "expo-camera";
 import { useTranslation } from "react-i18next";
 import i18n from "@apps4all/i18n";
 import { SettingsModal4All } from "@apps4all/ui-components";
@@ -49,8 +55,10 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
   const isDark = colorScheme === "dark";
   const accentHex = isDark ? "#2DD4BF" : "#0F766E";
 
+  const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { saveRecord } = useQRStore();
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [includeBarcodes, setIncludeBarcodes] = useState(true);
 
@@ -61,11 +69,10 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
   const [settingsVisible, setSettingsVisible] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission().catch(() => {});
+    }
+  }, [permission, requestPermission]);
 
   const handleBarcodeScanned = ({
     type,
@@ -96,33 +103,30 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const imageUri = result.assets[0].uri;
 
-        const scannerApi = Camera as unknown as {
-          scanFromURLAsync?: (
-            uri: string,
-            types: string[],
-          ) => Promise<Array<{ data: string; type?: string }>>;
-        };
+        let barcodes = await scanFromURLAsync(
+          imageUri,
+          includeBarcodes ? ALL_BARCODE_TYPES : QR_ONLY_TYPES,
+        );
 
-        if (scannerApi.scanFromURLAsync) {
-          const barcodes = await scannerApi.scanFromURLAsync(
-            imageUri,
-            includeBarcodes ? ALL_BARCODE_TYPES : QR_ONLY_TYPES,
-          );
-          if (barcodes && barcodes.length > 0) {
-            const data = barcodes[0].data;
-            const fmt = (barcodes[0].type || "qr").toUpperCase();
-            saveRecord({ type: "scan", data });
-            setScannedFormat(fmt);
-            setScannedData(data);
-            return;
-          }
+        // Retry explicitly with QR-only if multi-barcode scan returned empty
+        if ((!barcodes || barcodes.length === 0) && includeBarcodes) {
+          barcodes = await scanFromURLAsync(imageUri, QR_ONLY_TYPES);
+        }
+
+        if (barcodes && barcodes.length > 0) {
+          const data = barcodes[0].data;
+          const fmt = (barcodes[0].type || "qr").toUpperCase();
+          saveRecord({ type: "scan", data });
+          setScannedFormat(fmt);
+          setScannedData(data);
+          return;
         }
 
         Alert.alert(
           t("qr_gallery_scan", "Escanear desde galería"),
           t(
-            "qr_gallery_scan_desc",
-            "Apunta con la cámara al código QR o usa una imagen de tu galería.",
+            "qr_err_gallery_desc",
+            "No se detectó ningún código QR en la imagen seleccionada. Prueba recortar la imagen para que el QR se vea más grande y nítido.",
           ),
         );
       }
@@ -184,13 +188,16 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
     }
   };
 
-  if (hasPermission === null) {
-    return <View className="flex-1 bg-zinc-950" />;
+  if (!permission) {
+    return <View style={{ flex: 1, backgroundColor: "#09090b" }} />;
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6">
+      <SafeAreaView
+        edges={["top", "bottom"]}
+        className="flex-1 items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6"
+      >
         <Text className="text-xl font-bold text-center mb-4 text-zinc-900 dark:text-white">
           {t(
             "qr_camera_permission",
@@ -199,9 +206,8 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
         </Text>
         <TouchableOpacity
           className="bg-teal-700 px-6 py-3.5 rounded-full"
-          onPress={async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === "granted");
+          onPress={() => {
+            requestPermission().catch(() => {});
           }}
           accessible={true}
           accessibilityRole="button"
@@ -216,10 +222,13 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
   }
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={{ flex: 1, backgroundColor: "#000000" }}>
       <CameraView
-        style={StyleSheet.absoluteFillObject}
+        key="qr-camera-active"
+        style={{ flex: 1 }}
         facing="back"
+        mode="picture"
+        active={isFocused && !scannedData}
         enableTorch={torchEnabled}
         onBarcodeScanned={scannedData ? undefined : handleBarcodeScanned}
         barcodeScannerSettings={{
@@ -227,8 +236,14 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
         }}
       />
 
+      {/* Overlay Container */}
+      <View
+        style={StyleSheet.absoluteFillObject}
+        pointerEvents="box-none"
+      >
+
       {/* Top Controls: Brand + Barcode Toggle + Torch + Settings */}
-      <SafeAreaView edges={["top"]} className="z-10">
+      <SafeAreaView edges={["top", "bottom"]} className="z-10">
         <View className="pt-2 px-5 flex-row justify-between items-center">
           <Text className="text-white/90 font-black text-lg tracking-wider">
             {t("qr_title", "QR 4All")}
@@ -298,7 +313,10 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
       </View>
 
       {/* Bottom Nav Bar */}
-      <View className="absolute bottom-10 flex-row w-full justify-evenly items-center px-6">
+      <View
+        style={{ bottom: Math.max(insets.bottom + 18, 28) }}
+        className="absolute flex-row w-full justify-evenly items-center px-6"
+      >
         {/* History / Library */}
         <TouchableOpacity
           onPress={() => navigation.navigate("History")}
@@ -407,6 +425,7 @@ export default function ScannerScreen({ navigation }: { navigation: { navigate: 
         accentColor={accentHex}
         i18nInstance={i18n}
       />
+      </View>
     </View>
   );
 }

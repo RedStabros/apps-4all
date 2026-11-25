@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <atomic>
+#include <mutex>
 
 enum class FilterType {
     LowShelf,
@@ -52,8 +53,10 @@ public:
     void setBandParams(int bandIndex, float frequencyHz, float gainDb, float qFactor);
     void processInterleavedStereo(float* buffer, int32_t numFrames);
     void reset();
+    void resetState();
 
 private:
     float mSampleRate = 48000.0f;
     BiquadFilter mBands[NUM_BANDS];
+    std::mutex mCoeffMutex;
 };

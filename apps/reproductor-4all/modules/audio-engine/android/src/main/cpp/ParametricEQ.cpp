@@ -92,13 +92,15 @@ void BiquadFilter::stepSmoothing() {
 }
 
 inline float BiquadFilter::processSample(float in, float& z1, float& z2) {
-    // Transposed Direct Form II:
-    // y = b0 * x + z1
-    // z1 = b1 * x - a1 * y + z2
-    // z2 = b2 * x - a2 * y
+    // Transposed Direct Form II con protección anti-NaN / anti-denormal
     float out = mCoeffs.b0 * in + z1;
     z1 = mCoeffs.b1 * in - mCoeffs.a1 * out + z2;
     z2 = mCoeffs.b2 * in - mCoeffs.a2 * out;
+    if (!std::isfinite(out) || !std::isfinite(z1) || !std::isfinite(z2)) {
+        z1 = 0.0f;
+        z2 = 0.0f;
+        return in;
+    }
     return out;
 }
 
@@ -129,14 +131,30 @@ void ParametricEQ::reset() {
     }
 }
 
+void ParametricEQ::resetState() {
+    std::lock_guard<std::mutex> lock(mCoeffMutex);
+    for (int i = 0; i < NUM_BANDS; ++i) {
+        mBands[i].mZ1_L = 0.0f;
+        mBands[i].mZ2_L = 0.0f;
+        mBands[i].mZ1_R = 0.0f;
+        mBands[i].mZ2_R = 0.0f;
+    }
+}
+
 void ParametricEQ::setSampleRate(float sampleRate) {
+    std::lock_guard<std::mutex> lock(mCoeffMutex);
     mSampleRate = sampleRate;
     for (int i = 0; i < NUM_BANDS; ++i) {
         mBands[i].updateCoeffs(mSampleRate);
+        mBands[i].mZ1_L = 0.0f;
+        mBands[i].mZ2_L = 0.0f;
+        mBands[i].mZ1_R = 0.0f;
+        mBands[i].mZ2_R = 0.0f;
     }
 }
 
 void ParametricEQ::setBandParams(int bandIndex, float frequencyHz, float gainDb, float qFactor) {
+    std::lock_guard<std::mutex> lock(mCoeffMutex);
     if (bandIndex >= 0 && bandIndex < NUM_BANDS) {
         FilterType type = (bandIndex == 0) ? FilterType::LowShelf :
                           (bandIndex == NUM_BANDS - 1) ? FilterType::HighShelf : FilterType::Peaking;
@@ -145,6 +163,11 @@ void ParametricEQ::setBandParams(int bandIndex, float frequencyHz, float gainDb,
 }
 
 void ParametricEQ::processInterleavedStereo(float* buffer, int32_t numFrames) {
+    std::unique_lock<std::mutex> lock(mCoeffMutex, std::try_to_lock);
+    if (!lock.owns_lock()) {
+        // Never block audio thread if UI is updating coeffs right now
+        return;
+    }
     for (int32_t f = 0; f < numFrames; ++f) {
         int idx = f * 2;
         float left = buffer[idx];
@@ -156,7 +179,13 @@ void ParametricEQ::processInterleavedStereo(float* buffer, int32_t numFrames) {
             right = mBands[b].processSample(right, mBands[b].mZ1_R, mBands[b].mZ2_R);
         }
 
-        // Hard limiter suave a [-1.0, 1.0] para evitar clipping digital por exceso de ganancia
+        // Soft limiter suave (tanh) para evitar clipping digital sin distorsión brusca
+        if (std::abs(left) > 0.92f) {
+            left = std::tanh(left);
+        }
+        if (std::abs(right) > 0.92f) {
+            right = std::tanh(right);
+        }
         buffer[idx] = std::clamp(left, -1.0f, 1.0f);
         buffer[idx + 1] = std::clamp(right, -1.0f, 1.0f);
     }

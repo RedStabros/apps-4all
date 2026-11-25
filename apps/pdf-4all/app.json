@@ -2,7 +2,7 @@
   "expo": {
     "name": "PDF 4All",
     "slug": "pdf-4all",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -15,11 +15,15 @@
         "backgroundColor": "#09090b",
         "foregroundImage": "./assets/android-icon-foreground.png"
       },
-      "package": "com.apps4all.pdf4all"
+      "package": "com.apps4all.pdf4all",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      "./plugins/withNativePdfRenderer"
+    ],
     "splash": {
       "image": "./assets/icon.png",
       "resizeMode": "contain",

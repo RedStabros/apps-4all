@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   Alert,
   TextInput,
   useColorScheme,
+  Platform,
+  NativeModules,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -105,6 +108,149 @@ export default function MainScreen() {
     AsyncStorage.removeItem(RECENTS_STORAGE_KEY).catch(() => {});
   };
 
+  const openDocumentFile = useCallback(
+    async (file: { uri: string; name: string; size?: number }) => {
+      try {
+        const name = file.name.toLowerCase();
+
+        // 1. Format Check (Block Legacy binary .doc / .xls)
+        if (name.endsWith(".doc") || name.endsWith(".xls")) {
+          Alert.alert(
+            t("docs_err_format_title", "Formato antiguo no compatible"),
+            t(
+              "docs_error_format",
+              "Guarda el archivo como .docx o .xlsx para abrirlo sin pérdida de datos.",
+            ),
+          );
+          return;
+        }
+
+        // 2. Memory Shield (10MB Limit)
+        if (file.size && file.size > MAX_FILE_SIZE) {
+          Alert.alert(
+            t("docs_err_size_title", "Archivo demasiado grande"),
+            t(
+              "docs_error_size",
+              "Para proteger la memoria de tu teléfono, abre documentos de máximo 10 MB.",
+            ),
+          );
+          return;
+        }
+
+        setIsProcessing(true);
+        setFileName(file.name);
+        setSearchKeyword("");
+
+        if (name.endsWith(".txt") || name.endsWith(".md")) {
+          const text = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          setFileType("text");
+          setDocContent(
+            text || t("docs_empty_doc", "No se encontró texto en el documento."),
+          );
+          setExcelData(null);
+          setSheetsList([]);
+          setCachedWorkbook(null);
+          recordRecent(file.name, "text");
+        } else if (name.endsWith(".docx")) {
+          const fileBase64 = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const buffer = Buffer.from(fileBase64, "base64");
+          const arrayBuffer = buffer.buffer.slice(
+            buffer.byteOffset,
+            buffer.byteOffset + buffer.byteLength,
+          );
+          setFileType("docx");
+          let extractedText = "";
+          try {
+            const res = await mammoth.extractRawText({ arrayBuffer });
+            extractedText = res?.value || "";
+          } catch {
+            const res = await mammoth.extractRawText({ buffer });
+            extractedText = res?.value || "";
+          }
+          setDocContent(
+            extractedText.trim() ||
+              t("docs_empty_doc", "No se encontró texto en el documento."),
+          );
+          setExcelData(null);
+          setSheetsList([]);
+          setCachedWorkbook(null);
+          recordRecent(file.name, "docx");
+        } else if (name.endsWith(".xlsx") || name.endsWith(".csv")) {
+          const fileBase64 = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const buffer = Buffer.from(fileBase64, "base64");
+          setFileType("xlsx");
+          const workbook = XLSX.read(buffer, {
+            type: "buffer",
+            codepage: 65001,
+            cellFormula: false,
+            cellHTML: false,
+            cellText: false,
+          });
+          setCachedWorkbook(workbook);
+          setSheetsList(workbook.SheetNames);
+          setActiveSheetIndex(0);
+
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json(firstSheet, {
+            header: 1,
+          }) as any[][];
+          setExcelData(data);
+          setDocContent(null);
+          recordRecent(file.name, "xlsx");
+        } else {
+          setFileName(null);
+          Alert.alert(
+            t("docs_err_format_title", "Formato no compatible"),
+            t(
+              "docs_err_unsupported_desc",
+              "Formatos soportados: .docx, .xlsx, .csv, .txt y .md.",
+            ),
+          );
+        }
+      } catch {
+        setFileName(null);
+        Alert.alert(
+          t("docs_err_open_title", "Error al leer el documento"),
+          t(
+            "docs_err_open_desc",
+            "No se pudo procesar el archivo. Verifica que no esté corrupto o protegido con contraseña.",
+          ),
+        );
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [t],
+  );
+
+  // Auto-open incoming document when user taps a .docx/.xlsx/.md/.txt and chooses "Docs 4All"
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const checkIncomingDoc = async () => {
+      try {
+        const intent = await NativeModules.DocsIntent4All?.getInitialDocIntent?.();
+        if (intent?.uri) {
+          await openDocumentFile({
+            uri: intent.uri,
+            name: intent.name || "Documento.docx",
+            size: intent.size,
+          });
+        }
+      } catch {}
+    };
+    checkIncomingDoc();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") checkIncomingDoc();
+    });
+    return () => sub.remove();
+  }, [openDocumentFile]);
+
   const handleOpenDoc = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -123,98 +269,12 @@ export default function MainScreen() {
       if (result.canceled || result.assets.length === 0) return;
 
       const file = result.assets[0];
-      const name = file.name.toLowerCase();
-
-      // 1. Format Check (Block Legacy binary .doc / .xls)
-      if (name.endsWith(".doc") || name.endsWith(".xls")) {
-        Alert.alert(
-          t("docs_err_format_title", "Formato antiguo no compatible"),
-          t(
-            "docs_error_format",
-            "Guarda el archivo como .docx o .xlsx para abrirlo sin pérdida de datos.",
-          ),
-        );
-        return;
-      }
-
-      // 2. Memory Shield (10MB Limit)
-      if (file.size && file.size > MAX_FILE_SIZE) {
-        Alert.alert(
-          t("docs_err_size_title", "Archivo demasiado grande"),
-          t(
-            "docs_error_size",
-            "Para proteger la memoria de tu teléfono, abre documentos de máximo 10 MB.",
-          ),
-        );
-        return;
-      }
-
-      setIsProcessing(true);
-      setFileName(file.name);
-      setSearchKeyword("");
-
-      if (name.endsWith(".txt") || name.endsWith(".md")) {
-        const text = await FileSystem.readAsStringAsync(file.uri, {
-          encoding: FileSystem.EncodingType.UTF8,
-        });
-        setFileType("text");
-        setDocContent(
-          text || t("docs_empty_doc", "No se encontró texto en el documento."),
-        );
-        setExcelData(null);
-        setSheetsList([]);
-        setCachedWorkbook(null);
-        recordRecent(file.name, "text");
-      } else if (name.endsWith(".docx")) {
-        const fileBase64 = await FileSystem.readAsStringAsync(file.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const buffer = Buffer.from(fileBase64, "base64");
-        setFileType("docx");
-        const { value } = await mammoth.extractRawText({ buffer });
-        setDocContent(
-          value || t("docs_empty_doc", "No se encontró texto en el documento."),
-        );
-        setExcelData(null);
-        setSheetsList([]);
-        setCachedWorkbook(null);
-        recordRecent(file.name, "docx");
-      } else if (name.endsWith(".xlsx") || name.endsWith(".csv")) {
-        const fileBase64 = await FileSystem.readAsStringAsync(file.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const buffer = Buffer.from(fileBase64, "base64");
-        setFileType("xlsx");
-        const workbook = XLSX.read(buffer, {
-          type: "buffer",
-          codepage: 65001,
-          cellFormula: false,
-          cellHTML: false,
-          cellText: false,
-        });
-        setCachedWorkbook(workbook);
-        setSheetsList(workbook.SheetNames);
-        setActiveSheetIndex(0);
-
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(firstSheet, {
-          header: 1,
-        }) as any[][];
-        setExcelData(data);
-        setDocContent(null);
-        recordRecent(file.name, "xlsx");
-      } else {
-        setFileName(null);
-        Alert.alert(
-          t("docs_err_format_title", "Formato no compatible"),
-          t(
-            "docs_err_unsupported_desc",
-            "Formatos soportados: .docx, .xlsx, .csv, .txt y .md.",
-          ),
-        );
-      }
+      await openDocumentFile({
+        uri: file.uri,
+        name: file.name,
+        size: file.size,
+      });
     } catch {
-      setFileName(null);
       Alert.alert(
         t("docs_err_read_title", "No se pudo leer el documento"),
         t(
@@ -489,7 +549,7 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-white dark:bg-zinc-900"
     >
       <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">

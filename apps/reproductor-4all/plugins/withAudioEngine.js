@@ -48,6 +48,44 @@ module.exports = function withAudioEngine(config) {
         mainApplication.service.push(serviceEntry);
       }
 
+      // Registrar Home-Screen Widget nativo (ReproductorWidgetProvider)
+      if (!mainApplication.receiver) {
+        mainApplication.receiver = [];
+      }
+      const hasWidgetReceiver = mainApplication.receiver.some(
+        (r) =>
+          r.$?.["android:name"] ===
+          "com.apps4all.audioengine.ReproductorWidgetProvider",
+      );
+      if (!hasWidgetReceiver) {
+        mainApplication.receiver.push({
+          $: {
+            "android:name": "com.apps4all.audioengine.ReproductorWidgetProvider",
+            "android:exported": "true",
+            "android:label": "Reproductor 4All",
+          },
+          "intent-filter": [
+            {
+              action: [
+                {
+                  $: {
+                    "android:name": "android.appwidget.action.APPWIDGET_UPDATE",
+                  },
+                },
+              ],
+            },
+          ],
+          "meta-data": [
+            {
+              $: {
+                "android:name": "android.appwidget.provider",
+                "android:resource": "@xml/widget_reproductor_4all_info",
+              },
+            },
+          ],
+        });
+      }
+
       // Meta-data oficial para Android Auto (Media)
       if (!mainApplication["meta-data"]) {
         mainApplication["meta-data"] = [];
@@ -60,6 +98,19 @@ module.exports = function withAudioEngine(config) {
           $: {
             "android:name": "com.google.android.gms.car.application",
             "android:resource": "@xml/automotive_app_desc",
+          },
+        });
+      }
+      const hasCarIcon = mainApplication["meta-data"].some(
+        (m) =>
+          m.$?.["android:name"] ===
+          "com.google.android.gms.car.notification.SmallIcon",
+      );
+      if (!hasCarIcon) {
+        mainApplication["meta-data"].push({
+          $: {
+            "android:name": "com.google.android.gms.car.notification.SmallIcon",
+            "android:resource": "@mipmap/ic_launcher",
           },
         });
       }

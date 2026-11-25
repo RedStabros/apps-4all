@@ -167,18 +167,6 @@ export default function MainScreen() {
 
   const pickImages = async () => {
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          t("fotos_perm_title", "Permiso de galería"),
-          t(
-            "fotos_perm_desc",
-            "Autoriza el acceso a tus fotos para comprimirlas y guardarlas.",
-          ),
-        );
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsMultipleSelection: true,
@@ -186,7 +174,7 @@ export default function MainScreen() {
         quality: 1,
       });
 
-      if (!result.canceled && result.assets.length > 0) {
+      if (!result.canceled && result.assets && result.assets.length > 0) {
         setSelectedImages((prev) => [...prev, ...result.assets]);
       }
     } catch {
@@ -202,6 +190,19 @@ export default function MainScreen() {
 
   const processImages = async () => {
     if (selectedImages.length === 0) return;
+
+    const { status } = await MediaLibrary.requestPermissionsAsync(true);
+    if (status !== "granted") {
+      Alert.alert(
+        t("fotos_perm_title", "Permiso de galería"),
+        t(
+          "fotos_perm_desc",
+          "Autoriza guardar fotos en tu galería para almacenar las imágenes comprimidas.",
+        ),
+      );
+      return;
+    }
+
     setIsProcessing(true);
     setProgress(0);
 
@@ -254,11 +255,11 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         {/* Header */}
@@ -297,6 +298,41 @@ export default function MainScreen() {
               )}
             </Text>
           </View>
+
+          {/* Immediate Selected Photos Action Bar (visible right away without scrolling) */}
+          {selectedImages.length > 0 && (
+            <View className="bg-teal-700 dark:bg-teal-600 p-4 rounded-2xl mb-4 flex-row items-center justify-between shadow-sm">
+              <View className="flex-1 mr-3">
+                <Text className="text-white font-black text-sm">
+                  {selectedImages.length}{" "}
+                  {selectedImages.length === 1
+                    ? t("fotos_selected_one", "foto seleccionada")
+                    : t("fotos_selected_many", "fotos seleccionadas")}
+                </Text>
+                {compressedSizeStr ? (
+                  <Text className="text-teal-100 text-xs mt-0.5">
+                    {originalSizeStr} → {compressedSizeStr} (-{savingsPercent}%)
+                  </Text>
+                ) : null}
+              </View>
+              <TouchableOpacity
+                onPress={processImages}
+                disabled={isProcessing}
+                className="bg-white px-4 py-2.5 rounded-xl flex-row items-center"
+              >
+                {isProcessing ? (
+                  <ActivityIndicator size="small" color="#0F766E" />
+                ) : (
+                  <Zap color="#0F766E" size={16} />
+                )}
+                <Text className="text-teal-800 font-black text-xs ml-1.5">
+                  {isProcessing
+                    ? `${progress}%`
+                    : t("fotos_compress_now", "Comprimir")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Preset Profiles Bar */}
           <Text className="text-xs uppercase font-bold text-zinc-400 mb-2 tracking-wider">

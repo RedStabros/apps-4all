@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,10 @@ import {
   Modal,
   KeyboardAvoidingView,
   useColorScheme,
+  Image,
+  NativeModules,
+  Dimensions,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
@@ -72,12 +76,72 @@ export default function MainScreen() {
   );
   const [organizePages, setOrganizePages] = useState<number[]>([]);
 
+  // In-App Native PDF Viewer state (Android PdfRenderer — 0 KB external deps)
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerTitle, setViewerTitle] = useState("");
+  const [viewerUri, setViewerUri] = useState<string | null>(null);
+  const [viewerPages, setViewerPages] = useState<string[]>([]);
+  const [viewerTotalPages, setViewerTotalPages] = useState(0);
+  const [viewerZoom, setViewerZoom] = useState<1 | 1.5>(1);
+  const screenWidth = Dimensions.get("window").width;
+
   const formatKB = (bytes: number) =>
     bytes >= 1024 * 1024
       ? `${(bytes / (1024 * 1024)).toFixed(2)} MB`
       : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 
-  // 1. READ PDF
+  // 1. READ PDF IN-APP (Android native PdfRenderer — 0 KB external libs)
+  const openPdfInApp = useCallback(async (uri: string, title: string) => {
+    setIsProcessing(true);
+    try {
+      const nativeRenderer = NativeModules.PdfRenderer4All;
+      if (Platform.OS === "android" && nativeRenderer?.renderPdfPages) {
+        const res = await nativeRenderer.renderPdfPages(uri, 40);
+        if (res?.pages && res.pages.length > 0) {
+          setViewerTitle(title);
+          setViewerUri(uri);
+          setViewerPages(res.pages);
+          setViewerTotalPages(res.pageCount || res.pages.length);
+          setViewerZoom(1);
+          setViewerVisible(true);
+          return;
+        }
+      }
+      if (Platform.OS === "android") {
+        const contentUri = await FileSystem.getContentUriAsync(uri);
+        await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+          data: contentUri,
+          flags: 1,
+          type: "application/pdf",
+        });
+      } else {
+        await Sharing.shareAsync(uri);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  // Auto-open incoming PDF when user taps a .pdf in WhatsApp/Files and chooses "PDF 4All"
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const checkIncomingPdf = async () => {
+      try {
+        const intent = await NativeModules.PdfRenderer4All?.getInitialPdfIntent?.();
+        if (intent?.uri) {
+          await openPdfInApp(intent.uri, intent.name || "Documento.pdf");
+        }
+      } catch {
+        // Ignore if no incoming intent
+      }
+    };
+    checkIncomingPdf();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") checkIncomingPdf();
+    });
+    return () => sub.remove();
+  }, [openPdfInApp]);
+
   const handleReadPDF = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -86,25 +150,8 @@ export default function MainScreen() {
       });
 
       if (result.canceled || result.assets.length === 0) return;
-      const uri = result.assets[0].uri;
-
-      if (Platform.OS === "android") {
-        try {
-          const contentUri = await FileSystem.getContentUriAsync(uri);
-          await IntentLauncher.startActivityAsync(
-            "android.intent.action.VIEW",
-            {
-              data: contentUri,
-              flags: 1,
-              type: "application/pdf",
-            },
-          );
-        } catch {
-          await Sharing.shareAsync(uri);
-        }
-      } else {
-        await Sharing.shareAsync(uri);
-      }
+      const asset = result.assets[0];
+      await openPdfInApp(asset.uri, asset.name || "Documento.pdf");
     } catch {
       Alert.alert(
         t("pdf_err_open_title", "No se pudo abrir el PDF"),
@@ -729,7 +776,7 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-white dark:bg-zinc-900"
     >
       <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
@@ -926,7 +973,7 @@ export default function MainScreen() {
           animationType="slide"
         >
           <View className="flex-1 bg-black/60 justify-end">
-            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6 max-h-[80%] border-t border-zinc-200 dark:border-zinc-800">
+            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14 max-h-[80%] border-t border-zinc-200 dark:border-zinc-800">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-lg font-black text-zinc-900 dark:text-white">
                   {t("pdf_organize", "Organizar Páginas")}
@@ -1002,6 +1049,86 @@ export default function MainScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </Modal>
+
+        {/* In-App Native PDF Reader Modal */}
+        <Modal
+          visible={viewerVisible}
+          animationType="slide"
+          onRequestClose={() => setViewerVisible(false)}
+        >
+          <SafeAreaView
+            edges={["top", "bottom"]}
+            className="flex-1 bg-zinc-950"
+          >
+            <View className="flex-row items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
+              <View className="flex-1 mr-3">
+                <Text
+                  className="text-white font-bold text-sm"
+                  numberOfLines={1}
+                >
+                  {viewerTitle}
+                </Text>
+                <Text className="text-zinc-400 text-xs">
+                  {viewerPages.length} / {viewerTotalPages}{" "}
+                  {t("pdf_pages_label", "páginas")}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity
+                  onPress={() => setViewerZoom(viewerZoom === 1 ? 1.5 : 1)}
+                  className="px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700"
+                >
+                  <Text className="text-white font-bold text-xs">
+                    {viewerZoom === 1 ? "1x" : "1.5x"}
+                  </Text>
+                </TouchableOpacity>
+                {viewerUri && (
+                  <TouchableOpacity
+                    onPress={() => Sharing.shareAsync(viewerUri).catch(() => {})}
+                    className="p-2 rounded-xl bg-blue-600"
+                  >
+                    <Share color="#fff" size={16} />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPress={() => setViewerVisible(false)}
+                  className="p-2 rounded-xl bg-zinc-800"
+                >
+                  <X color="#fff" size={18} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <FlatList
+              data={viewerPages}
+              keyExtractor={(uri, idx) => `${uri}-${idx}`}
+              contentContainerStyle={{ padding: 12, gap: 14, alignItems: "center" }}
+              renderItem={({ item, index }) => (
+                <View className="bg-white rounded-xl overflow-hidden shadow-md">
+                  <ScrollView
+                    horizontal={viewerZoom > 1}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <Image
+                      source={{ uri: item }}
+                      style={{
+                        width: (screenWidth - 24) * viewerZoom,
+                        height: (screenWidth - 24) * 1.414 * viewerZoom,
+                        backgroundColor: "#ffffff",
+                      }}
+                      resizeMode="contain"
+                    />
+                  </ScrollView>
+                  <View className="bg-zinc-900/90 py-1 px-3 items-center">
+                    <Text className="text-zinc-300 text-[11px] font-bold">
+                      {index + 1} / {viewerTotalPages}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            />
+          </SafeAreaView>
         </Modal>
 
         <SettingsModal4All

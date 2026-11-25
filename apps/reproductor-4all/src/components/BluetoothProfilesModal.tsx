@@ -72,7 +72,7 @@ export const BluetoothProfilesModal: React.FC<BluetoothProfilesModalProps> = ({
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-end bg-black/75">
-        <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl p-6 max-h-[85%]">
+        <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-6 pt-6 pb-14 max-h-[85%]">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-4">
             <View className="flex-row items-center">

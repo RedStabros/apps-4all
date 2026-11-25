@@ -58,10 +58,12 @@ const GRADIENTS: { name: string; colors: [string, string] }[] = [
 
 const BG_COLORS = [
   { id: "white", hex: "#ffffff" },
-  { id: "cream", hex: "#faf8f5" },
-  { id: "zinc", hex: "#f4f4f5" },
-  { id: "ice", hex: "#eff6ff" },
-  { id: "mint", hex: "#f0fdf4" },
+  { id: "amber", hex: "#fef3c7" },
+  { id: "blue", hex: "#dbeafe" },
+  { id: "mint", hex: "#ccfbf1" },
+  { id: "rose", hex: "#fce7f3" },
+  { id: "violet", hex: "#ede9fe" },
+  { id: "zinc", hex: "#e4e4e7" },
 ];
 
 const PRESET_ICONS = [

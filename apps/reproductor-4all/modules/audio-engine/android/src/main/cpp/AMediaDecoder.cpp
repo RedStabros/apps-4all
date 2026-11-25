@@ -33,9 +33,28 @@ bool AMediaDecoder::open(const std::string& filePath) {
     off_t fileSize = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
 
-    mExtractor = AMediaExtractor_new();
-    media_status_t status = AMediaExtractor_setDataSourceFd(mExtractor, fd, 0, fileSize);
+    bool ok = openFd(fd, static_cast<int64_t>(fileSize));
     ::close(fd);
+    return ok;
+}
+
+bool AMediaDecoder::openFd(int fd, int64_t length) {
+    stop();
+
+    if (fd < 0) {
+        LOGE("Descriptor de archivo inválido: %d", fd);
+        return false;
+    }
+
+    int64_t effectiveLen = length;
+    if (effectiveLen <= 0) {
+        off_t measured = lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        effectiveLen = measured > 0 ? static_cast<int64_t>(measured) : INT64_MAX;
+    }
+
+    mExtractor = AMediaExtractor_new();
+    media_status_t status = AMediaExtractor_setDataSourceFd(mExtractor, fd, 0, effectiveLen);
 
     if (status != AMEDIA_OK) {
         LOGE("AMediaExtractor_setDataSourceFd falló con estado %d", status);
@@ -45,12 +64,14 @@ bool AMediaDecoder::open(const std::string& filePath) {
 
     size_t numTracks = AMediaExtractor_getTrackCount(mExtractor);
     mTrackIndex = -1;
-    const char* mime = nullptr;
+    std::string mimeStr;
 
     for (size_t i = 0; i < numTracks; ++i) {
         AMediaFormat* format = AMediaExtractor_getTrackFormat(mExtractor, i);
-        if (AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mime)) {
+        const char* mime = nullptr;
+        if (AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mime) && mime != nullptr) {
             if (strncmp(mime, "audio/", 6) == 0) {
+                mimeStr = mime;
                 mTrackIndex = static_cast<int>(i);
                 AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, &mSampleRate);
                 AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &mChannelCount);
@@ -69,18 +90,18 @@ bool AMediaDecoder::open(const std::string& filePath) {
         AMediaFormat_delete(format);
     }
 
-    if (mTrackIndex < 0 || !mime) {
+    if (mTrackIndex < 0 || mimeStr.empty()) {
         LOGE("No se encontró pista de audio válida en el archivo.");
         cleanup();
         return false;
     }
 
     LOGI("Pista de audio localizada: MIME=%s, SampleRate=%d, Channels=%d, Duración=%lld ms",
-         mime, mSampleRate, mChannelCount, (long long)mDurationMs.load());
+         mimeStr.c_str(), mSampleRate, mChannelCount, (long long)mDurationMs.load());
 
-    mCodec = AMediaCodec_createDecoderByType(mime);
+    mCodec = AMediaCodec_createDecoderByType(mimeStr.c_str());
     if (!mCodec) {
-        LOGE("No se pudo instanciar decodificador nativo por hardware para MIME %s", mime);
+        LOGE("No se pudo instanciar decodificador nativo por hardware para MIME %s", mimeStr.c_str());
         cleanup();
         return false;
     }
@@ -103,11 +124,22 @@ bool AMediaDecoder::open(const std::string& filePath) {
     }
 
     mPositionMs.store(0);
+    mFinished.store(false);
     return true;
 }
 
 void AMediaDecoder::start() {
-    if (mIsRunning.load()) return;
+    if (!mCodec || !mExtractor) {
+        LOGE("AMediaDecoder::start llamado sin archivo cargado.");
+        return;
+    }
+    if (mIsRunning.load()) {
+        mIsPlaying.store(true);
+        return;
+    }
+    if (mDecodeThread.joinable()) {
+        mDecodeThread.join();
+    }
     mIsRunning.store(true);
     mIsPlaying.store(true);
     mDecodeThread = std::thread(&AMediaDecoder::decodeLoop, this);
@@ -131,6 +163,7 @@ void AMediaDecoder::stop() {
 }
 
 void AMediaDecoder::seekTo(int64_t positionMs) {
+    mFinished.store(false);
     mSeekPositionUs.store(positionMs * 1000);
     mSeekRequested.store(true);
 }
@@ -155,6 +188,10 @@ void AMediaDecoder::decodeLoop() {
     convertedSamples.reserve(8192);
 
     while (mIsRunning.load() && !sawOutputEOS) {
+        if (!mIsPlaying.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
         // Manejar seek si fue solicitado
         if (mSeekRequested.load()) {
             int64_t targetUs = mSeekPositionUs.load();
@@ -239,8 +276,8 @@ void AMediaDecoder::decodeLoop() {
                     size_t written = mRingBuffer.write(convertedSamples.data() + totalWritten, toWrite - totalWritten);
                     totalWritten += written;
                     if (totalWritten < toWrite) {
-                        // Esperar que el callback de Oboe consuma muestras
-                        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                        // Esperar que el callback de Oboe consuma muestras (12ms ahorra batería y CPU)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(12));
                     }
                 }
 
@@ -257,5 +294,9 @@ void AMediaDecoder::decodeLoop() {
         }
     }
 
+    if (sawOutputEOS && mIsRunning.load()) {
+        mFinished.store(true);
+    }
     mIsPlaying.store(false);
+    mIsRunning.store(false);
 }

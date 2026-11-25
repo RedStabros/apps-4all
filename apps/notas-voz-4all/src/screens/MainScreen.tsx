@@ -11,9 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
-import { Audio } from "expo-av";
+import {
+  useAudioRecorder,
+  RecordingPresets,
+  createAudioPlayer,
+  setAudioModeAsync,
+  requestRecordingPermissionsAsync,
+  AudioPlayer,
+} from "expo-audio";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
 import i18n from "@apps4all/i18n";
@@ -51,6 +58,7 @@ const CATEGORIES: { id: VoiceCategory; labelKey: string; fallback: string }[] =
 
 export default function MainScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const accentHex = isDark ? "#60A5FA" : "#2563EB";
@@ -64,12 +72,12 @@ export default function MainScreen() {
     updateTrim,
   } = useAudioStore();
 
-  const recordingRef = useRef<Audio.Recording | null>(null);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<AudioPlayer | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
 
@@ -95,10 +103,10 @@ export default function MainScreen() {
   useEffect(() => {
     (async () => {
       try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
+        await setAudioModeAsync({
+          allowsRecording: true,
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
         });
       } catch {
         // Audio mode will be configured on demand
@@ -107,13 +115,14 @@ export default function MainScreen() {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (soundRef.current) {
-        soundRef.current.unloadAsync().catch(() => {});
-        soundRef.current = null;
-      }
-      if (recordingRef.current) {
-        recordingRef.current.stopAndUnloadAsync().catch(() => {});
-        recordingRef.current = null;
+      if (playerRef.current) {
+        try {
+          playerRef.current.pause();
+          playerRef.current.remove();
+        } catch {
+          // ignore
+        }
+        playerRef.current = null;
       }
     };
   }, []);
@@ -134,8 +143,8 @@ export default function MainScreen() {
 
   const startRecording = async () => {
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status !== "granted") {
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
         Alert.alert(
           t("voz_perm_title", "Permiso de micrófono"),
           t(
@@ -146,21 +155,23 @@ export default function MainScreen() {
         return;
       }
 
-      if (soundRef.current) {
-        await soundRef.current.stopAsync().catch(() => {});
+      if (playerRef.current) {
+        try {
+          playerRef.current.pause();
+        } catch {
+          // ignore
+        }
         setPlayingId(null);
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
       });
 
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      );
-      recordingRef.current = newRecording;
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
       setIsRecording(true);
       setIsPaused(false);
       setRecordingDuration(0);
@@ -177,16 +188,15 @@ export default function MainScreen() {
   };
 
   const togglePauseRecording = async () => {
-    const activeRec = recordingRef.current;
-    if (!activeRec || !isRecording) return;
+    if (!isRecording) return;
 
     try {
       if (isPaused) {
-        await activeRec.startAsync();
+        audioRecorder.record();
         setIsPaused(false);
         startTimer();
       } else {
-        await activeRec.pauseAsync();
+        audioRecorder.pause();
         setIsPaused(true);
         stopTimer();
       }
@@ -202,23 +212,21 @@ export default function MainScreen() {
   };
 
   const stopRecording = async () => {
-    const activeRec = recordingRef.current;
-    if (!activeRec) return;
+    if (!isRecording) return;
 
     try {
       stopTimer();
       setIsRecording(false);
       setIsPaused(false);
 
-      const statusBeforeStop = await activeRec.getStatusAsync().catch(() => null);
-      await activeRec.stopAndUnloadAsync();
-      const uri = activeRec.getURI();
+      const statusBeforeStop = audioRecorder.getStatus();
+      await audioRecorder.stop();
+      const uri = audioRecorder.uri;
       const finalDurationMs =
         statusBeforeStop?.durationMillis && statusBeforeStop.durationMillis > 0
           ? statusBeforeStop.durationMillis
           : recordingDuration * 1000;
 
-      recordingRef.current = null;
       setRecordingDuration(0);
 
       if (uri) {
@@ -236,7 +244,6 @@ export default function MainScreen() {
         }
       }
     } catch {
-      recordingRef.current = null;
       setIsRecording(false);
       setIsPaused(false);
       setRecordingDuration(0);
@@ -252,40 +259,61 @@ export default function MainScreen() {
 
   const togglePlayback = async (rec: AudioRecord, customStartMs?: number) => {
     try {
-      if (playingId === rec.id && soundRef.current) {
-        await soundRef.current.pauseAsync();
+      if (playingId === rec.id && playerRef.current) {
+        playerRef.current.pause();
         setPlayingId(null);
       } else {
-        if (soundRef.current) {
-          await soundRef.current.unloadAsync().catch(() => {});
-          soundRef.current = null;
+        if (playerRef.current) {
+          try {
+            playerRef.current.pause();
+            playerRef.current.remove();
+          } catch {
+            // ignore
+          }
+          playerRef.current = null;
         }
 
-        const startPos = customStartMs ?? (rec.trimStartMs || 0);
-        const endPos = rec.trimEndMs;
+        const startPosSec = (customStartMs ?? (rec.trimStartMs || 0)) / 1000;
+        const endPosSec = rec.trimEndMs ? rec.trimEndMs / 1000 : null;
 
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: rec.uri },
-          { shouldPlay: false, rate: playbackSpeed, shouldCorrectPitch: true },
-          (status) => {
-            if (status.isLoaded) {
-              if (
-                status.didJustFinish ||
-                (endPos && status.positionMillis >= endPos)
-              ) {
-                setPlayingId(null);
-                soundRef.current?.stopAsync().catch(() => {});
+        await setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
+        }).catch(() => {});
+
+        const player = createAudioPlayer({ uri: rec.uri });
+        let didSeekStart = false;
+
+        player.addListener("playbackStatusUpdate", (status) => {
+          if (status.isLoaded) {
+            if (!didSeekStart && startPosSec > 0) {
+              didSeekStart = true;
+              player.seekTo(startPosSec).catch(() => {});
+              return;
+            }
+            if (
+              status.didJustFinish ||
+              (endPosSec !== null && status.currentTime >= endPosSec)
+            ) {
+              setPlayingId(null);
+              try {
+                player.pause();
+              } catch {
+                // ignore
               }
             }
-          },
-        );
+          }
+        });
 
-        if (startPos > 0) {
-          await newSound.setPositionAsync(startPos);
+        try {
+          player.setPlaybackRate(playbackSpeed, "high");
+        } catch {
+          // Device may not support pitch correction on all codecs
         }
 
-        await newSound.playAsync();
-        soundRef.current = newSound;
+        player.play();
+        playerRef.current = player;
         setPlayingId(rec.id);
       }
     } catch {
@@ -302,9 +330,9 @@ export default function MainScreen() {
 
   const changeSpeed = async (speed: number) => {
     setPlaybackSpeed(speed);
-    if (soundRef.current) {
+    if (playerRef.current) {
       try {
-        await soundRef.current.setRateAsync(speed, true);
+        playerRef.current.setPlaybackRate(speed, "high");
       } catch {
         // Ignored if unloaded
       }
@@ -348,9 +376,14 @@ export default function MainScreen() {
           text: t("delete", "Eliminar"),
           style: "destructive",
           onPress: async () => {
-            if (playingId === rec.id && soundRef.current) {
-              await soundRef.current.unloadAsync().catch(() => {});
-              soundRef.current = null;
+            if (playingId === rec.id && playerRef.current) {
+              try {
+                playerRef.current.pause();
+                playerRef.current.remove();
+              } catch {
+                // ignore
+              }
+              playerRef.current = null;
               setPlayingId(null);
             }
             await deleteRecording(rec.id);
@@ -567,7 +600,7 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       {/* Header */}
@@ -785,7 +818,7 @@ export default function MainScreen() {
         onRequestClose={() => setEditingRecord(null)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1 bg-black/60 items-center justify-center p-6"
         >
           <View className="bg-white dark:bg-zinc-900 w-full p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl">
@@ -856,15 +889,19 @@ export default function MainScreen() {
       <Modal
         visible={!!trimmingRecord}
         transparent={true}
+        statusBarTranslucent={true}
         animationType="slide"
         onRequestClose={() => setTrimmingRecord(null)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
           className="flex-1 bg-black/70 justify-end"
         >
-          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6">
-            <View className="flex-row justify-between items-center mb-4">
+          <View
+            className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6"
+            style={{ paddingBottom: Math.max(insets.bottom + 24, 48) }}
+          >
+            <View className="flex-row justify-between items-center mb-3">
               <Text className="text-lg font-black text-zinc-900 dark:text-white">
                 {t("voz_trim", "Ajustar / Recortar")}
               </Text>
@@ -879,10 +916,10 @@ export default function MainScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+            <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-4 leading-4">
               {t(
                 "voz_trim_helper",
-                "Ajusta los segundos para omitir pausas al inicio o al final del audio:",
+                "Recorte de reproducción local para omitir silencios al inicio o final (el archivo original compartido se conserva intacto):",
               )}
             </Text>
 

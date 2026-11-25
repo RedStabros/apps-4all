@@ -844,6 +844,7 @@ const productivityApps = [
     ...item,
     name: data.name,
     iconUrl: data.iconUrl,
+    apkUrl: data.apkUrl,
     desc: isEs ? data.summary.es : data.summary.en,
     hasAccountOption: data.hasAccountOption,
     accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
@@ -862,6 +863,7 @@ const utilitiesApps = [
     ...item,
     name: data.name,
     iconUrl: data.iconUrl,
+    apkUrl: data.apkUrl,
     desc: isEs ? data.summary.es : data.summary.en,
     hasAccountOption: data.hasAccountOption,
     accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
@@ -880,6 +882,7 @@ const timeMathApps = [
     ...item,
     name: data.name,
     iconUrl: data.iconUrl,
+    apkUrl: data.apkUrl,
     desc: isEs ? data.summary.es : data.summary.en,
     hasAccountOption: data.hasAccountOption,
     accountBadge: isEs ? data.accountBadge.es : data.accountBadge.en,
@@ -1062,7 +1065,7 @@ const apkBase = "https://github.com/RedStabros/apps-4all/releases/latest";
             <AppCard
               name={app.name}
               description={app.desc}
-              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              apkUrl={app.apkUrl}
               category="productivity"
               emoji={app.emoji}
               iconUrl={app.iconUrl}
@@ -1088,7 +1091,7 @@ const apkBase = "https://github.com/RedStabros/apps-4all/releases/latest";
             <AppCard
               name={app.name}
               description={app.desc}
-              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              apkUrl={app.apkUrl}
               category="utilities"
               emoji={app.emoji}
               iconUrl={app.iconUrl}
@@ -1114,7 +1117,7 @@ const apkBase = "https://github.com/RedStabros/apps-4all/releases/latest";
             <AppCard
               name={app.name}
               description={app.desc}
-              apkUrl={`${apkBase}/${app.slug}/releases/latest`}
+              apkUrl={app.apkUrl}
               category="time-math"
               emoji={app.emoji}
               iconUrl={app.iconUrl}

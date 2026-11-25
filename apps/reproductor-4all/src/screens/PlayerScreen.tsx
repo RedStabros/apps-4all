@@ -10,6 +10,9 @@ import {
   Modal,
   Platform,
   PermissionsAndroid,
+  TextInput,
+  Alert,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
@@ -45,6 +48,8 @@ import {
   Repeat1,
   Moon,
   BarChart3,
+  EyeOff,
+  RotateCcw,
 } from "lucide-react-native";
 
 const formatTime = (ms: number): string => {
@@ -88,17 +93,23 @@ export default function PlayerScreen() {
     applyProfile,
     handleBluetoothDeviceConnected,
     removeTrack,
+    createSavedPlaylist,
+    normalizationEnabled,
+    mixerFadeSeconds,
+    setNormalizationEnabled,
+    setMixerFadeSeconds,
   } = useAudioPlayerStore();
 
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [eqModalVisible, setEqModalVisible] = useState(false);
   const [playlistModalVisible, setPlaylistModalVisible] = useState(false);
+  const [saveListName, setSaveListName] = useState("");
   const [explorerModalVisible, setExplorerModalVisible] = useState(false);
   const [btModalVisible, setBtModalVisible] = useState(false);
   const [sleepModalVisible, setSleepModalVisible] = useState(false);
   const [displayMode, setDisplayMode] = useState<
-    "waveform" | "spectrum" | "vinyl"
-  >("waveform");
+    "waveform" | "spectrum" | "vinyl" | "off"
+  >("spectrum");
   const [timelineWidth, setTimelineWidth] = useState(300);
   const [sleepRemainingMin, setSleepRemainingMin] = useState<number | null>(
     null,
@@ -170,6 +181,7 @@ export default function PlayerScreen() {
 
     const mediaSub = AudioEngine.onMediaButtonAction((event) => {
       if (event.action === "NEXT") nextTrack(false);
+      else if (event.action === "TRACK_ENDED") nextTrack(true);
       else if (event.action === "PREVIOUS") previousTrack();
       else if (event.action === "PLAY") play();
       else if (event.action === "PAUSE") pause();
@@ -179,12 +191,16 @@ export default function PlayerScreen() {
     });
 
     const interval = setInterval(async () => {
-      if (isPlaying) {
+      if (isPlaying && AppState.currentState === "active") {
         try {
           const status = await AudioEngine.getPlaybackStatus();
+          if (status?.isFinished) {
+            nextTrack(true);
+            return;
+          }
           if (status?.positionMs !== undefined) {
             updatePosition(status.positionMs);
-            if (durationMs > 0 && status.positionMs >= durationMs - 200) {
+            if (durationMs > 0 && status.positionMs >= durationMs - 600) {
               nextTrack(true);
             }
           } else {
@@ -244,7 +260,7 @@ export default function PlayerScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       {/* Header */}
@@ -345,12 +361,12 @@ export default function PlayerScreen() {
         </TouchableOpacity>
       )}
 
-      {/* 3 Graphic Visualizer Modes: Waveform | Spectrum | Vinyl */}
+      {/* 4 Visualizer Modes: Waveform | Spectrum | Vinyl | Off */}
       <View className="flex-row justify-center mt-3 mb-1 px-4">
         <View className="flex-row bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 rounded-xl">
           <TouchableOpacity
             onPress={() => setDisplayMode("waveform")}
-            className={`flex-row items-center px-3 py-1.5 rounded-lg ${
+            className={`flex-row items-center px-2.5 py-1.5 rounded-lg ${
               displayMode === "waveform"
                 ? "bg-teal-500/20 border border-teal-500/40"
                 : ""
@@ -361,19 +377,19 @@ export default function PlayerScreen() {
               size={13}
             />
             <Text
-              className={`text-[11px] font-bold ml-1.5 ${
+              className={`text-[11px] font-bold ml-1 ${
                 displayMode === "waveform"
                   ? "text-teal-700 dark:text-teal-400"
                   : "text-zinc-500"
               }`}
             >
-              {t("reproductor_waveform", "Forma de Onda")}
+              {t("reproductor_waveform_short", "Onda")}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setDisplayMode("spectrum")}
-            className={`flex-row items-center px-3 py-1.5 rounded-lg ${
+            className={`flex-row items-center px-2.5 py-1.5 rounded-lg ${
               displayMode === "spectrum"
                 ? "bg-teal-500/20 border border-teal-500/40"
                 : ""
@@ -384,19 +400,19 @@ export default function PlayerScreen() {
               size={13}
             />
             <Text
-              className={`text-[11px] font-bold ml-1.5 ${
+              className={`text-[11px] font-bold ml-1 ${
                 displayMode === "spectrum"
                   ? "text-teal-700 dark:text-teal-400"
                   : "text-zinc-500"
               }`}
             >
-              {t("reproductor_spectrum", "Espectro EQ")}
+              {t("reproductor_spectrum_short", "Espectro")}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setDisplayMode("vinyl")}
-            className={`flex-row items-center px-3 py-1.5 rounded-lg ${
+            className={`flex-row items-center px-2.5 py-1.5 rounded-lg ${
               displayMode === "vinyl"
                 ? "bg-teal-500/20 border border-teal-500/40"
                 : ""
@@ -407,13 +423,36 @@ export default function PlayerScreen() {
               size={13}
             />
             <Text
-              className={`text-[11px] font-bold ml-1.5 ${
+              className={`text-[11px] font-bold ml-1 ${
                 displayMode === "vinyl"
                   ? "text-teal-700 dark:text-teal-400"
                   : "text-zinc-500"
               }`}
             >
               {t("reproductor_vinyl", "Vinilo")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setDisplayMode("off")}
+            className={`flex-row items-center px-2.5 py-1.5 rounded-lg ${
+              displayMode === "off"
+                ? "bg-teal-500/20 border border-teal-500/40"
+                : ""
+            }`}
+          >
+            <EyeOff
+              color={displayMode === "off" ? accentHex : mutedHex}
+              size={13}
+            />
+            <Text
+              className={`text-[11px] font-bold ml-1 ${
+                displayMode === "off"
+                  ? "text-teal-700 dark:text-teal-400"
+                  : "text-zinc-500"
+              }`}
+            >
+              {t("reproductor_vis_off", "Off")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -427,18 +466,17 @@ export default function PlayerScreen() {
             isPlaying={isPlaying}
             positionMs={positionMs}
             durationMs={durationMs}
-            bands={bands}
             onSeek={seekTo}
           />
-        ) : (
-          <View className="w-60 h-60 rounded-full bg-zinc-900 border-4 border-zinc-800 items-center justify-center shadow-2xl relative">
-            <View className="w-48 h-48 rounded-full border border-zinc-800/80 items-center justify-center">
-              <View className="w-36 h-36 rounded-full border border-zinc-800/60 items-center justify-center">
+        ) : displayMode === "vinyl" ? (
+          <View className="w-56 h-56 rounded-full bg-zinc-900 border-4 border-zinc-800 items-center justify-center shadow-2xl relative">
+            <View className="w-44 h-44 rounded-full border border-zinc-800/80 items-center justify-center">
+              <View className="w-32 h-32 rounded-full border border-zinc-800/60 items-center justify-center">
                 <Animated.View
                   style={{ transform: [{ rotate: spin }] }}
-                  className="w-24 h-24 rounded-full bg-teal-500 items-center justify-center border-2 border-teal-300/40"
+                  className="w-20 h-20 rounded-full bg-teal-500 items-center justify-center border-2 border-teal-300/40"
                 >
-                  <Disc color="#09090b" size={36} />
+                  <Disc color="#09090b" size={32} />
                 </Animated.View>
               </View>
             </View>
@@ -446,9 +484,13 @@ export default function PlayerScreen() {
             <View className="absolute bottom-2 px-3 py-1 bg-zinc-950/90 border border-teal-500/40 rounded-full">
               <Text className="text-[10px] font-black tracking-widest text-teal-400 uppercase">
                 {currentTrack.format} •{" "}
-                {t("reproductor_bit_perfect", "24-BIT BIT-PERFECT")}
+                {t("reproductor_bit_perfect", "OBOE DSP")}
               </Text>
             </View>
+          </View>
+        ) : (
+          <View className="w-24 h-24 rounded-3xl bg-zinc-200/70 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 items-center justify-center">
+            <Music color={accentHex} size={38} />
           </View>
         )}
 
@@ -687,7 +729,7 @@ export default function PlayerScreen() {
         onRequestClose={() => setEqModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/70">
-          <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl p-6 max-h-[82%]">
+          <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-6 pt-6 pb-14 max-h-[82%]">
             <View className="flex-row justify-between items-center mb-4">
               <View className="flex-1 mr-2">
                 <Text className="text-lg font-black text-white">
@@ -742,60 +784,178 @@ export default function PlayerScreen() {
               </View>
             </ScrollView>
 
-            {/* 5 Band Sliders */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {bands.map((band, idx) => (
-                <View
-                  key={band.id}
-                  className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80 mb-3"
-                >
-                  <View className="flex-row justify-between items-center mb-1.5">
-                    <Text className="text-xs font-black text-white">
-                      {band.name} ({band.frequencyHz} Hz)
-                    </Text>
-                    <Text className="text-xs font-mono font-bold text-teal-400">
-                      {band.gainDb > 0
-                        ? `+${band.gainDb.toFixed(1)}`
-                        : band.gainDb.toFixed(1)}{" "}
-                      dB
-                    </Text>
-                  </View>
+            {/* Classic 5-Band Vertical Console EQ */}
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-[10px] font-mono text-zinc-400">
+                +15 dB  •  0 dB (Centro)  •  -15 dB
+              </Text>
+              <TouchableOpacity
+                onPress={() => applyProfile("flat")}
+                className="flex-row items-center px-2.5 py-1 bg-zinc-800 rounded-lg"
+              >
+                <RotateCcw color="#2DD4BF" size={12} />
+                <Text className="text-[10px] font-bold text-teal-400 ml-1">
+                  {t("reproductor_eq_reset", "Plano (0 dB)")}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-                  <View className="flex-row items-center justify-between mt-1">
-                    <TouchableOpacity
-                      onPress={() =>
-                        setBandGain(idx, Math.max(-15, band.gainDb - 1.5))
-                      }
-                      className="px-3 py-1.5 bg-zinc-800 rounded-lg"
+            <View className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+              <View className="flex-row justify-between items-end h-52">
+                {bands.map((band, idx) => {
+                  const pct = Math.max(
+                    0,
+                    Math.min(100, ((band.gainDb + 15) / 30) * 100),
+                  );
+                  const freqLabel =
+                    band.frequencyHz >= 1000
+                      ? `${band.frequencyHz / 1000}kHz`
+                      : `${band.frequencyHz}Hz`;
+                  return (
+                    <View
+                      key={band.id}
+                      className="flex-1 items-center h-full justify-between"
                     >
-                      <Text className="text-zinc-300 font-bold text-xs">
-                        -1.5
+                      <Text className="text-[10px] font-mono font-bold text-teal-400 mb-1">
+                        {band.gainDb > 0
+                          ? `+${band.gainDb.toFixed(0)}`
+                          : band.gainDb.toFixed(0)}
                       </Text>
-                    </TouchableOpacity>
 
-                    <View className="flex-1 mx-3 h-2 bg-zinc-800 rounded-full overflow-hidden relative">
-                      <View
-                        style={{
-                          width: `${((band.gainDb + 15) / 30) * 100}%`,
+                      {/* Interactive Vertical Fader Track */}
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={(e) => {
+                          const trackH = 140;
+                          const y = Math.max(
+                            0,
+                            Math.min(trackH, e.nativeEvent.locationY),
+                          );
+                          const rawGain = 15 - (y / trackH) * 30;
+                          const snapped = Math.round(rawGain * 2) / 2; // 0.5 dB steps
+                          setBandGain(idx, Math.max(-15, Math.min(15, snapped)));
                         }}
-                        className="h-full bg-teal-500 rounded-full"
-                      />
-                    </View>
+                        style={{ height: 140 }}
+                        className="w-10 items-center justify-center relative"
+                      >
+                        {/* 0 dB center tick */}
+                        <View className="absolute left-1 right-1 h-[1px] bg-zinc-700" />
+                        {/* Vertical rail */}
+                        <View className="w-2.5 h-full bg-zinc-800 rounded-full overflow-hidden justify-end">
+                          <View
+                            style={{ height: `${pct}%` }}
+                            className="w-full bg-teal-500 rounded-full"
+                          />
+                        </View>
+                        {/* Fader knob */}
+                        <View
+                          style={{ bottom: `${pct}%`, marginBottom: -8 }}
+                          className="absolute w-5 h-4 rounded-md bg-teal-300 border-2 border-zinc-950"
+                        />
+                      </TouchableOpacity>
 
+                      {/* Fine +/- buttons */}
+                      <View className="flex-row gap-1 mt-1.5">
+                        <TouchableOpacity
+                          onPress={() =>
+                            setBandGain(idx, Math.max(-15, band.gainDb - 1.5))
+                          }
+                          className="w-5 h-5 bg-zinc-800 rounded items-center justify-center"
+                        >
+                          <Text className="text-zinc-300 text-xs font-bold">
+                            -
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() =>
+                            setBandGain(idx, Math.min(15, band.gainDb + 1.5))
+                          }
+                          className="w-5 h-5 bg-zinc-800 rounded items-center justify-center"
+                        >
+                          <Text className="text-zinc-300 text-xs font-bold">
+                            +
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <Text className="text-[10px] font-bold text-zinc-400 mt-1">
+                        {freqLabel}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* DSP Extras: Normalizar Volumen + Mixer Fade */}
+            <View className="mt-4 gap-2.5">
+              <View className="flex-row items-center justify-between bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-3">
+                <View className="flex-1 mr-3">
+                  <Text className="text-xs font-black text-white">
+                    {t("reproductor_normalize", "Normalizar Volumen")}
+                  </Text>
+                  <Text className="text-[10px] text-zinc-400">
+                    {t(
+                      "reproductor_normalize_desc",
+                      "Nivela el volumen entre canciones (-14 dBFS)",
+                    )}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setNormalizationEnabled(!normalizationEnabled)}
+                  className={`px-3.5 py-1.5 rounded-xl border ${
+                    normalizationEnabled
+                      ? "bg-teal-500/20 border-teal-500"
+                      : "bg-zinc-800 border-zinc-700"
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-black ${
+                      normalizationEnabled ? "text-teal-400" : "text-zinc-400"
+                    }`}
+                  >
+                    {normalizationEnabled ? "ON" : "OFF"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View className="flex-row items-center justify-between bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-3">
+                <View className="flex-1 mr-3">
+                  <Text className="text-xs font-black text-white">
+                    {t("reproductor_mixer", "Mixer Suave (Fade + Sin Silencios)")}
+                  </Text>
+                  <Text className="text-[10px] text-zinc-400">
+                    {t(
+                      "reproductor_mixer_desc",
+                      "Fade-in/out suave y omite silencios iniciales",
+                    )}
+                  </Text>
+                </View>
+                <View className="flex-row gap-1">
+                  {([0, 3, 5] as const).map((sec) => (
                     <TouchableOpacity
-                      onPress={() =>
-                        setBandGain(idx, Math.min(15, band.gainDb + 1.5))
-                      }
-                      className="px-3 py-1.5 bg-zinc-800 rounded-lg"
+                      key={sec}
+                      onPress={() => setMixerFadeSeconds(sec)}
+                      className={`px-2.5 py-1.5 rounded-lg border ${
+                        mixerFadeSeconds === sec
+                          ? "bg-teal-500/20 border-teal-500"
+                          : "bg-zinc-800 border-zinc-700"
+                      }`}
                     >
-                      <Text className="text-zinc-300 font-bold text-xs">
-                        +1.5
+                      <Text
+                        className={`text-[11px] font-bold ${
+                          mixerFadeSeconds === sec
+                            ? "text-teal-400"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        {sec === 0 ? "Off" : `${sec}s`}
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                  ))}
                 </View>
-              ))}
-            </ScrollView>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>
@@ -808,7 +968,7 @@ export default function PlayerScreen() {
         onRequestClose={() => setPlaylistModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/70">
-          <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl p-6 max-h-[75%]">
+          <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-6 pt-6 pb-14 max-h-[75%]">
             <View className="flex-row justify-between items-center mb-4">
               <View>
                 <Text className="text-lg font-black text-white">
@@ -839,6 +999,38 @@ export default function PlayerScreen() {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {playlist.length > 0 && (
+              <View className="flex-row items-center gap-2 mb-3">
+                <TextInput
+                  value={saveListName}
+                  onChangeText={setSaveListName}
+                  placeholder={t(
+                    "reproductor_save_queue_placeholder",
+                    "Nombre para guardar esta lista...",
+                  )}
+                  placeholderTextColor="#71717A"
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-white text-xs"
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    const name = saveListName.trim();
+                    if (!name) return;
+                    createSavedPlaylist(name, playlist);
+                    setSaveListName("");
+                    Alert.alert(
+                      t("reproductor_list_saved", "Lista guardada"),
+                      `"${name}" (${playlist.length})`,
+                    );
+                  }}
+                  className="px-3.5 py-2.5 bg-teal-500/20 border border-teal-500/40 rounded-xl"
+                >
+                  <Text className="text-teal-300 font-bold text-xs">
+                    {t("save", "Guardar")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
             <FlatList
               data={playlist}

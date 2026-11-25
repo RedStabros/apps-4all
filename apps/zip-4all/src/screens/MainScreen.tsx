@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  NativeModules,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
@@ -48,6 +50,7 @@ import {
   Settings,
   CheckSquare,
   Square,
+  FolderDown,
 } from "lucide-react-native";
 import * as Clipboard from "expo-clipboard";
 
@@ -95,6 +98,48 @@ export default function MainScreen() {
 
   // Preview Modal
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null);
+
+  const saveZipToDeviceStorage = async (sourceUri: string) => {
+    try {
+      const fileName = sourceUri.split("/").pop() || `archive_${Date.now()}.zip`;
+      if (Platform.OS === "android" && FileSystem.StorageAccessFramework) {
+        const perm =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!perm.granted) return;
+
+        const base64 = await FileSystem.readAsStringAsync(sourceUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const destUri =
+          await FileSystem.StorageAccessFramework.createFileAsync(
+            perm.directoryUri,
+            fileName,
+            "application/zip",
+          );
+        await FileSystem.writeAsStringAsync(destUri, base64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        Alert.alert(
+          t("zip_success", "¡Guardado!"),
+          t(
+            "zip_saved_device_ok",
+            "Archivo guardado en la carpeta elegida de tu teléfono ({{name}}).",
+            { name: fileName },
+          ),
+        );
+      } else {
+        await Sharing.shareAsync(sourceUri);
+      }
+    } catch {
+      Alert.alert(
+        t("zip_err_save_title", "No se pudo guardar en carpeta"),
+        t(
+          "zip_err_save_desc",
+          "Intenta elegir la carpeta Descargas o Documentos, o usa Compartir.",
+        ),
+      );
+    }
+  };
 
   const formatBytes = (bytes: number) => {
     if (!bytes || bytes <= 0) return "0 B";
@@ -276,19 +321,8 @@ export default function MainScreen() {
     }
   };
 
-  const handleDecompress = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ["application/zip", "application/x-zip-compressed", "*/*"],
-        copyToCacheDirectory: true,
-      });
-
-      if (result.canceled || result.assets.length === 0) return;
-
-      const sourceZip = result.assets[0].uri;
-      const zipName = result.assets[0].name || "archive.zip";
-
-      // Try inspecting ZIP contents natively (0 KB extra) for selective extraction
+  const inspectOrExtractZip = useCallback(
+    async (sourceZip: string, zipName: string) => {
       try {
         const allEntries = await listContents(sourceZip);
         const fileEntries = allEntries.filter((e) => !e.isDirectory);
@@ -304,8 +338,42 @@ export default function MainScreen() {
       } catch {
         // Fallback to direct full extraction if listing isn't supported for this archive
       }
-
       await executeExtraction(sourceZip, zipName);
+    },
+    [],
+  );
+
+  // Auto-open incoming .zip when user taps a ZIP in WhatsApp/Files and chooses "ZIP 4All"
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const checkIncomingZip = async () => {
+      try {
+        const intent = await NativeModules.ZipIntent4All?.getInitialZipIntent?.();
+        if (intent?.uri) {
+          await inspectOrExtractZip(intent.uri, intent.name || "archivo.zip");
+        }
+      } catch {}
+    };
+    checkIncomingZip();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") checkIncomingZip();
+    });
+    return () => sub.remove();
+  }, [inspectOrExtractZip]);
+
+  const handleDecompress = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["application/zip", "application/x-zip-compressed", "*/*"],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled || result.assets.length === 0) return;
+
+      const sourceZip = result.assets[0].uri;
+      const zipName = result.assets[0].name || "archive.zip";
+
+      await inspectOrExtractZip(sourceZip, zipName);
     } catch {
       Alert.alert(
         t("zip_err_extract_title", "No se pudo descomprimir"),
@@ -401,11 +469,11 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         {/* Header */}
@@ -567,15 +635,26 @@ export default function MainScreen() {
               </View>
 
               {outputZip && (
-                <TouchableOpacity
-                  onPress={() => shareFile(outputZip)}
-                  className="w-full mt-4 py-3.5 rounded-2xl bg-teal-700 dark:bg-teal-600 flex-row items-center justify-center shadow-sm"
-                >
-                  <ShareIcon color="#fff" size={16} />
-                  <Text className="text-white font-bold text-sm ml-2">
-                    {t("zip_share_file", "Compartir Archivo ZIP")}
-                  </Text>
-                </TouchableOpacity>
+                <View className="mt-4 gap-2.5">
+                  <TouchableOpacity
+                    onPress={() => saveZipToDeviceStorage(outputZip)}
+                    className="w-full py-3.5 rounded-2xl bg-teal-700 dark:bg-teal-600 flex-row items-center justify-center shadow-sm"
+                  >
+                    <FolderDown color="#fff" size={16} />
+                    <Text className="text-white font-bold text-sm ml-2">
+                      {t("zip_save_to_phone", "Guardar en Carpeta del Teléfono")}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => shareFile(outputZip)}
+                    className="w-full py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex-row items-center justify-center"
+                  >
+                    <ShareIcon color={accentHex} size={16} />
+                    <Text className="text-zinc-900 dark:text-white font-bold text-sm ml-2">
+                      {t("zip_share_file", "Compartir Archivo ZIP")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
           )}
@@ -722,7 +801,7 @@ export default function MainScreen() {
           onRequestClose={() => setPendingInspect(null)}
         >
           <View className="flex-1 bg-black/75 justify-end">
-            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-5 max-h-[82%] border-t border-zinc-200 dark:border-zinc-800">
+            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-14 max-h-[82%] border-t border-zinc-200 dark:border-zinc-800">
               <View className="flex-row justify-between items-center mb-2">
                 <Text
                   className="font-black text-base text-zinc-900 dark:text-white flex-1 mr-2"
@@ -834,7 +913,7 @@ export default function MainScreen() {
           onRequestClose={() => setPreviewFile(null)}
         >
           <View className="flex-1 bg-black/80 justify-end">
-            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6 max-h-[85%]">
+            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14 max-h-[85%]">
               <View className="flex-row justify-between items-center mb-4">
                 <Text
                   className="font-black text-base text-zinc-900 dark:text-white flex-1 mr-2"

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
+import { X } from "lucide-react-native";
 import { ECOSYSTEM_CONFIG } from "./ecosystemConfig";
 
 interface LegalModal4AllProps {
@@ -31,7 +32,7 @@ export function LegalModal4All({
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View className="flex-1 bg-black/75 justify-end">
-        <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6 max-h-[85%] border-t border-zinc-200 dark:border-zinc-800">
+        <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14 max-h-[85%] border-t border-zinc-200 dark:border-zinc-800">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-4 pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <View>
@@ -46,9 +47,7 @@ export function LegalModal4All({
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 items-center justify-center"
             >
-              <Text className="text-zinc-600 dark:text-zinc-300 font-bold text-base">
-                ✕
-              </Text>
+              <X size={16} color="#71717a" />
             </TouchableOpacity>
           </View>
 

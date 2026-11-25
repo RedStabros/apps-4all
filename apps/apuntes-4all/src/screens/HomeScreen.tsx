@@ -25,6 +25,7 @@ import {
   X,
   Settings,
   Trash2,
+  StickyNote,
 } from "lucide-react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as FileSystem from "expo-file-system/legacy";
@@ -260,7 +261,7 @@ export default function HomeScreen({ navigation }: any) {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-white dark:bg-zinc-900"
     >
       <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
@@ -406,7 +407,7 @@ export default function HomeScreen({ navigation }: any) {
                 className="bg-white dark:bg-zinc-900 p-4 rounded-3xl mb-5 flex-row items-center border border-zinc-200 dark:border-zinc-800 shadow-sm"
               >
                 <View className="bg-blue-50 dark:bg-blue-950/40 w-12 h-12 rounded-2xl items-center justify-center mr-4 border border-blue-500/20">
-                  <Text className="text-2xl">📝</Text>
+                  <StickyNote size={22} color={accentHex} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-lg font-black text-zinc-900 dark:text-white">

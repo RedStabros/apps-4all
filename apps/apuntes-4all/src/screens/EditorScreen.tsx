@@ -276,7 +276,7 @@ export default function EditorScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView

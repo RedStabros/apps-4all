@@ -35,6 +35,7 @@ interface QRState {
   clearHistory: () => void;
 
   saveCreatedQR: (qr: Omit<QRRecord, "id" | "timestamp">) => void;
+  updateCreatedQR: (id: string, qr: Omit<QRRecord, "id" | "timestamp">) => void;
   deleteCreatedQR: (id: string) => void;
   clearSavedQRs: () => void;
   importSavedQRs: (records: QRRecord[]) => number;
@@ -101,6 +102,16 @@ export const useQRStore = create<QRState>()(
         };
 
         set({ savedQRs: [newQR, ...current] });
+      },
+
+      updateCreatedQR: (id, qr) => {
+        set({
+          savedQRs: get().savedQRs.map((item) =>
+            item.id === id
+              ? { ...item, ...qr, timestamp: Date.now() }
+              : item,
+          ),
+        });
       },
 
       deleteCreatedQR: (id) => {

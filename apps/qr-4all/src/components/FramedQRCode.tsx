@@ -106,22 +106,26 @@ const FramedQRCode = forwardRef<FramedQRCodeRef, Props>(
       (styleConfig.isGradient ? styleConfig.gradientColors[0] : styleConfig.fgColor);
     const frameText = styleConfig.frameText || "SCAN ME";
 
-    // When no frame is selected, render QRCode directly
+    // When no frame is selected, render QRCode directly with quiet zone & chosen bgColor
     if (styleConfig.frameType === "none") {
       return (
-        <View className="items-center justify-center">
+        <View
+          className="items-center justify-center rounded-2xl p-3"
+          style={{ backgroundColor: styleConfig.bgColor || "#ffffff" }}
+        >
           <QRCode
             value={value}
             size={size}
+            quietZone={12}
             color={styleConfig.fgColor}
-            backgroundColor={styleConfig.bgColor}
+            backgroundColor={styleConfig.bgColor || "#ffffff"}
             enableLinearGradient={styleConfig.isGradient}
             linearGradient={styleConfig.gradientColors}
             gradientDirection={["0%", "0%", "100%", "100%"]}
             logo={logoSource}
             logoSVG={logoSvgComponent}
             logoSize={size * 0.22}
-            logoBackgroundColor="#ffffff"
+            logoBackgroundColor={styleConfig.bgColor || "#ffffff"}
             logoBorderRadius={12}
             logoMargin={4}
             ecl={hasLogo ? "H" : "M"}
@@ -133,9 +137,12 @@ const FramedQRCode = forwardRef<FramedQRCodeRef, Props>(
       );
     }
 
-    // When a frame is selected, render styled card container
+    // When a frame is selected, render styled card container with chosen bgColor
     return (
-      <View className="items-center justify-center p-6 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <View
+        className="items-center justify-center p-6 rounded-3xl border border-zinc-200 dark:border-zinc-700 shadow-sm"
+        style={{ backgroundColor: styleConfig.bgColor || "#ffffff" }}
+      >
         {/* Top Scan Me Pill */}
         {styleConfig.frameType === "scanme-top" && (
           <View
@@ -152,15 +159,16 @@ const FramedQRCode = forwardRef<FramedQRCodeRef, Props>(
         <QRCode
           value={value}
           size={size}
+          quietZone={12}
           color={styleConfig.fgColor}
-          backgroundColor={styleConfig.bgColor}
+          backgroundColor={styleConfig.bgColor || "#ffffff"}
           enableLinearGradient={styleConfig.isGradient}
           linearGradient={styleConfig.gradientColors}
           gradientDirection={["0%", "0%", "100%", "100%"]}
           logo={logoSource}
           logoSVG={logoSvgComponent}
           logoSize={size * 0.22}
-          logoBackgroundColor="#ffffff"
+          logoBackgroundColor={styleConfig.bgColor || "#ffffff"}
           logoBorderRadius={12}
           logoMargin={4}
           ecl={hasLogo ? "H" : "M"}

@@ -29,7 +29,17 @@ import {
   CalendarPlus,
   Briefcase,
   Sun,
+  Search,
+  CalendarDays,
 } from "lucide-react-native";
+
+const countryCodeToFlag = (code: string): string => {
+  if (!code || code.length !== 2) return "🌍";
+  const upper = code.toUpperCase();
+  return String.fromCodePoint(
+    ...[...upper].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
+};
 
 export const PRESET_COUNTRIES = [
   { code: "CO", name: "Colombia", flag: "🇨🇴", color: "#f59e0b" },
@@ -95,9 +105,52 @@ export default function HomeScreen({
   // Day Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
   const [selectedDay, setSelectedDay] = useState("");
   const [eventName, setEventName] = useState("");
   const [isHoliday, setIsHoliday] = useState(true);
+
+  const allCountries = useMemo(() => {
+    try {
+      const hd = new Holidays();
+      const map = hd.getCountries() as Record<string, string>;
+      return Object.entries(map)
+        .map(([code, name]) => ({
+          code,
+          name: String(name),
+          flag: countryCodeToFlag(code),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    } catch {
+      return PRESET_COUNTRIES.map((c) => ({
+        code: c.code,
+        name: c.name,
+        flag: c.flag,
+      }));
+    }
+  }, []);
+
+  const filteredCountries = useMemo(() => {
+    const q = countrySearch.trim().toLowerCase();
+    if (!q) {
+      const selectedSet = new Set(selectedCountries);
+      const selected = allCountries.filter((c) => selectedSet.has(c.code));
+      const popularCodes = new Set(["CO", "MX", "AR", "ES", "CL", "PE", "US", "BR", "FR", "DE", "IT", "GB", "JP", "KR", "IN"]);
+      const popular = allCountries.filter(
+        (c) => !selectedSet.has(c.code) && popularCodes.has(c.code),
+      );
+      const rest = allCountries.filter(
+        (c) => !selectedSet.has(c.code) && !popularCodes.has(c.code),
+      );
+      return [...selected, ...popular, ...rest].slice(0, 45);
+    }
+    return allCountries
+      .filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q),
+      )
+      .slice(0, 45);
+  }, [allCountries, countrySearch, selectedCountries]);
 
   // Business Days Calculator Modal
   const [bizModalVisible, setBizModalVisible] = useState(false);
@@ -113,11 +166,11 @@ export default function HomeScreen({
   const primaryCountryBadge = useMemo(() => {
     if (selectedCountries.length === 0) return t("festivos_countries", "Países");
     const badges = selectedCountries.map((code) => {
-      const preset = PRESET_COUNTRIES.find((p) => p.code === code);
-      return preset ? `${preset.flag} ${preset.name}` : code;
+      const found = allCountries.find((c) => c.code === code);
+      return found ? `${found.flag} ${found.name}` : `${countryCodeToFlag(code)} ${code}`;
     });
     return badges.join(" • ");
-  }, [selectedCountries, t]);
+  }, [selectedCountries, allCountries, t]);
 
   const allHolidays = useMemo<HolidayItem[]>(() => {
     const list: HolidayItem[] = [];
@@ -396,7 +449,7 @@ export default function HomeScreen({
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       {/* Header (Dynamic Country Badge persisted on open) */}
@@ -468,10 +521,13 @@ export default function HomeScreen({
             </Text>
 
             <View className="flex-row items-center justify-between mt-2">
-              <Text className="text-zinc-600 dark:text-zinc-400 text-sm font-medium">
-                📅 {nextHolidayInfo.holiday.date.split(" ")[0]} •{" "}
-                {nextHolidayInfo.holiday.countryLabel}
-              </Text>
+              <View className="flex-row items-center">
+                <CalendarDays size={15} color={mutedHex} />
+                <Text className="text-zinc-600 dark:text-zinc-400 text-sm font-medium ml-1.5">
+                  {nextHolidayInfo.holiday.date.split(" ")[0]} •{" "}
+                  {nextHolidayInfo.holiday.countryLabel}
+                </Text>
+              </View>
 
               <View
                 className="w-3 h-3 rounded-full"
@@ -666,10 +722,10 @@ export default function HomeScreen({
         onRequestClose={() => setBizModalVisible(false)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
           className="flex-1 justify-end bg-black/60"
         >
-          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14">
             <View className="flex-row justify-between items-center mb-4">
               <View className="flex-row items-center">
                 <Briefcase color={accentHex} size={20} />
@@ -751,10 +807,10 @@ export default function HomeScreen({
         onRequestClose={() => setModalVisible(false)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
           className="flex-1 justify-end bg-black/50"
         >
-          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14">
             <View className="flex-row justify-between items-center mb-5">
               <Text className="text-2xl font-black text-zinc-900 dark:text-white">
                 {selectedDay}
@@ -842,14 +898,34 @@ export default function HomeScreen({
         i18nInstance={i18n}
         appSpecificSection={
           <View className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-4">
-            <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-3 font-medium">
+            <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-2.5 font-medium">
               {t(
                 "festivos_select_countries_desc",
-                "Selecciona los países que quedarán guardados al abrir la app:",
+                "Busca y selecciona cualquier país ({{count}} disponibles offline):",
+                { count: allCountries.length },
               )}
             </Text>
+            <View className="flex-row items-center bg-zinc-100 dark:bg-zinc-800 rounded-xl px-3 py-2 mb-3">
+              <Search size={15} color="#71717a" />
+              <TextInput
+                value={countrySearch}
+                onChangeText={setCountrySearch}
+                placeholder={t(
+                  "festivos_search_country",
+                  "Buscar país (ej. Brasil, España, Japón...)",
+                )}
+                placeholderTextColor="#a1a1aa"
+                className="flex-1 ml-2 text-xs text-zinc-900 dark:text-white"
+                autoCorrect={false}
+              />
+              {countrySearch.length > 0 && (
+                <TouchableOpacity onPress={() => setCountrySearch("")}>
+                  <X size={15} color="#71717a" />
+                </TouchableOpacity>
+              )}
+            </View>
             <View className="flex-row flex-wrap gap-2 mb-3">
-              {PRESET_COUNTRIES.map((country) => {
+              {filteredCountries.map((country) => {
                 const active = selectedCountries.includes(country.code);
                 return (
                   <TouchableOpacity
@@ -866,7 +942,7 @@ export default function HomeScreen({
                       className={`text-xs font-bold ${
                         active
                           ? "text-amber-700 dark:text-amber-400"
-                          : "text-zinc-600 dark:text-zinc-400"
+                          : "text-zinc-600 dark:text-zinc-300"
                       }`}
                     >
                       {country.name}

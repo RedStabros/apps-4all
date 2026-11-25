@@ -27,20 +27,33 @@ import {
   Star,
   Search,
   X,
+  Ruler,
+  Thermometer,
+  Droplets,
+  Gauge,
+  Square,
+  HardDrive,
+  Clock,
+  Wind,
+  Zap,
 } from "lucide-react-native";
 import * as Clipboard from "expo-clipboard";
 
-const CATEGORIES: { id: Category; icon: string; nameKey: string }[] = [
-  { id: "length", icon: "📏", nameKey: "medidas_cat_length" },
-  { id: "weight", icon: "⚖️", nameKey: "medidas_cat_weight" },
-  { id: "temp", icon: "🌡️", nameKey: "medidas_cat_temp" },
-  { id: "volume", icon: "💧", nameKey: "medidas_cat_volume" },
-  { id: "speed", icon: "🚀", nameKey: "medidas_cat_speed" },
-  { id: "area", icon: "📐", nameKey: "medidas_cat_area" },
-  { id: "digital", icon: "💾", nameKey: "medidas_cat_digital" },
-  { id: "time", icon: "⏱️", nameKey: "medidas_cat_time" },
-  { id: "pressure", icon: "🛞", nameKey: "medidas_cat_pressure" },
-  { id: "energy", icon: "⚡", nameKey: "medidas_cat_energy" },
+const CATEGORIES: {
+  id: Category;
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
+  nameKey: string;
+}[] = [
+  { id: "length", Icon: Ruler, nameKey: "medidas_cat_length" },
+  { id: "weight", Icon: Scale, nameKey: "medidas_cat_weight" },
+  { id: "temp", Icon: Thermometer, nameKey: "medidas_cat_temp" },
+  { id: "volume", Icon: Droplets, nameKey: "medidas_cat_volume" },
+  { id: "speed", Icon: Gauge, nameKey: "medidas_cat_speed" },
+  { id: "area", Icon: Square, nameKey: "medidas_cat_area" },
+  { id: "digital", Icon: HardDrive, nameKey: "medidas_cat_digital" },
+  { id: "time", Icon: Clock, nameKey: "medidas_cat_time" },
+  { id: "pressure", Icon: Wind, nameKey: "medidas_cat_pressure" },
+  { id: "energy", Icon: Zap, nameKey: "medidas_cat_energy" },
 ];
 
 export default function HomeScreen() {
@@ -158,11 +171,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         {/* Header */}
@@ -195,31 +208,40 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}
             >
-              {CATEGORIES.map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  onPress={() => handleSelectCategory(cat.id)}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(cat.nameKey, cat.id)}
-                  className={`px-3.5 py-2.5 rounded-2xl border flex-row items-center ${
-                    category === cat.id
-                      ? "bg-amber-700 dark:bg-amber-400 border-amber-700 dark:border-amber-400"
-                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                  }`}
-                >
-                  <Text className="mr-1.5 text-sm">{cat.icon}</Text>
-                  <Text
-                    className={`font-bold text-xs ${
-                      category === cat.id
-                        ? "text-white dark:text-zinc-950"
-                        : "text-zinc-700 dark:text-zinc-300"
+              {CATEGORIES.map((cat) => {
+                const IconComp = cat.Icon;
+                const isActive = category === cat.id;
+                return (
+                  <TouchableOpacity
+                    key={cat.id}
+                    onPress={() => handleSelectCategory(cat.id)}
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(cat.nameKey, cat.id)}
+                    className={`px-3.5 py-2.5 rounded-2xl border flex-row items-center ${
+                      isActive
+                        ? "bg-amber-700 dark:bg-amber-400 border-amber-700 dark:border-amber-400"
+                        : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                     }`}
                   >
-                    {t(cat.nameKey, cat.id)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <View className="mr-1.5">
+                      <IconComp
+                        size={15}
+                        color={isActive ? (isDark ? "#09090b" : "#ffffff") : accentHex}
+                      />
+                    </View>
+                    <Text
+                      className={`font-bold text-xs ${
+                        isActive
+                          ? "text-white dark:text-zinc-950"
+                          : "text-zinc-700 dark:text-zinc-300"
+                      }`}
+                    >
+                      {t(cat.nameKey, cat.id)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </View>
 
@@ -450,10 +472,10 @@ export default function HomeScreen() {
           onRequestClose={() => setIsModalVisible(false)}
         >
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior="padding"
             className="flex-1 justify-end bg-black/55"
           >
-            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6 max-h-[75%]">
+            <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14 max-h-[75%]">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-xl font-black text-zinc-900 dark:text-white">
                   {t("medidas_select_unit", "Seleccionar Unidad")}

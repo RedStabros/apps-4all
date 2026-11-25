@@ -9,9 +9,9 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
-import { Camera, CameraView } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { useTranslation } from "react-i18next";
 import i18n from "@apps4all/i18n";
 import { SettingsModal4All } from "@apps4all/ui-components";
@@ -43,7 +43,8 @@ export default function MainScreen() {
   const isDark = colorScheme === "dark";
   const accentHex = isDark ? "#2DD4BF" : "#0F766E";
 
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const insets = useSafeAreaInsets();
+  const [permission, requestPermission] = useCameraPermissions();
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [zoom, setZoom] = useState(0);
   const [torch, setTorch] = useState(false);
@@ -55,11 +56,10 @@ export default function MainScreen() {
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission().catch(() => {});
+    }
+  }, [permission, requestPermission]);
 
   const toggleFreeze = async () => {
     if (isCapturing) return;
@@ -105,7 +105,7 @@ export default function MainScreen() {
     if (isCapturing) return;
 
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
         Alert.alert(
           t("lupa_perm_gallery_title", "Permiso de galería"),
@@ -156,17 +156,20 @@ export default function MainScreen() {
     }
   };
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
-      <View className="flex-1 bg-zinc-950 items-center justify-center">
+      <View style={{ flex: 1, backgroundColor: "#09090b", alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#2DD4BF" />
       </View>
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6">
+      <SafeAreaView
+        edges={["top", "bottom"]}
+        className="flex-1 items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6"
+      >
         <Text className="text-xl font-bold text-center mb-4 text-zinc-900 dark:text-white">
           {t(
             "lupa_camera_permission",
@@ -175,9 +178,8 @@ export default function MainScreen() {
         </Text>
         <TouchableOpacity
           className="bg-teal-700 dark:bg-teal-600 px-6 py-3.5 rounded-full"
-          onPress={async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === "granted");
+          onPress={() => {
+            requestPermission().catch(() => {});
           }}
           accessible={true}
           accessibilityRole="button"
@@ -229,11 +231,14 @@ export default function MainScreen() {
   };
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={{ flex: 1, backgroundColor: "#000000" }}>
       <CameraView
+        key="lupa-camera-active"
         ref={cameraRef}
-        style={StyleSheet.absoluteFillObject}
+        style={{ flex: 1 }}
         facing="back"
+        mode="picture"
+        active={!isFrozen}
         zoom={zoom}
         enableTorch={torch}
       />
@@ -251,7 +256,7 @@ export default function MainScreen() {
       {renderFilterOverlay()}
 
       {/* Top Bar: Accessibility Filter Chips */}
-      <SafeAreaView edges={["top"]} className="absolute top-0 w-full z-10">
+      <SafeAreaView edges={["top", "bottom"]} className="absolute top-0 w-full z-10">
         <View className="pt-2 px-5">
           <View className="flex-row items-center justify-between mb-2.5">
             <View className="flex-row items-center">

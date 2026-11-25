@@ -30,13 +30,14 @@ import {
   X,
   Download,
   Upload,
+  Pencil,
 } from "lucide-react-native";
 import FramedQRCode from "../components/FramedQRCode";
 
 export default function HistoryScreen({
   navigation,
 }: {
-  navigation: { goBack: () => void };
+  navigation: { goBack: () => void; navigate: (screen: string, params?: any) => void };
 }) {
   const { t } = useTranslation();
   const { colorScheme } = useColorScheme();
@@ -227,6 +228,19 @@ export default function HistoryScreen({
         </TouchableOpacity>
 
         <View className="flex-row items-center gap-2">
+          {activeTab === "saved" && (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Generator", { editRecord: record })
+              }
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t("edit", "Editar")}
+              className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl"
+            >
+              <Pencil color={accentHex} size={17} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => handleShare(record.data)}
             accessible={true}
@@ -255,7 +269,7 @@ export default function HistoryScreen({
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       {/* Header */}

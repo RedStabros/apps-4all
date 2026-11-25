@@ -8,11 +8,13 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Platform,
+  PermissionsAndroid,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import * as MediaLibrary from "expo-media-library";
 import {
   FolderOpen,
+  FolderPlus,
   Music,
   Check,
   X,
@@ -26,6 +28,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { useAudioPlayerStore, Track } from "../store/useAudioPlayerStore";
+import { AudioEngine } from "../../modules/audio-engine";
 
 interface FileExplorerModalProps {
   visible: boolean;
@@ -113,60 +116,138 @@ export const FileExplorerModal: React.FC<FileExplorerModalProps> = ({
   const handleScanDevice = async () => {
     setLoading(true);
     try {
-      const permission = await MediaLibrary.requestPermissionsAsync();
-      setPermissionGranted(permission.granted);
+      if (Platform.OS === "android") {
+        const perm =
+          typeof Platform.Version === "number" && Platform.Version >= 33
+            ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO
+            : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
 
-      if (!permission.granted) {
+        const alreadyGranted = await PermissionsAndroid.check(perm);
+        if (!alreadyGranted) {
+          const status = await PermissionsAndroid.request(perm);
+          const ok = status === PermissionsAndroid.RESULTS.GRANTED;
+          setPermissionGranted(ok);
+          if (!ok) {
+            setLoading(false);
+            return;
+          }
+        } else {
+          setPermissionGranted(true);
+        }
+      }
+
+      const scanned = await AudioEngine.scanDeviceAudio();
+      const tracks: Track[] = (scanned || []).map((item) => ({
+        id: item.id,
+        title: item.title,
+        artist: item.artist,
+        uri: item.uri,
+        durationMs: item.durationMs || 0,
+        format: item.format || "MP3",
+        folder: item.folder || "Music",
+      }));
+
+      setRawScannedFiles(tracks);
+      setSelectedIds(new Set(tracks.map((tr) => tr.id)));
+      if (tracks.length === 0) {
+        Alert.alert(
+          t("reproductor_no_music_title", "Sin archivos encontrados"),
+          t(
+            "reproductor_no_music_desc",
+            "No se encontraron archivos de audio en la biblioteca del sistema. Prueba con 'Elegir Carpeta'.",
+          ),
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      Alert.alert(
+        t("reproductor_scan_err_title", "No se pudo escanear"),
+        msg ||
+          t(
+            "reproductor_scan_err_desc",
+            "Revisa los permisos de audio en tu dispositivo e intenta de nuevo.",
+          ),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePickFolder = async () => {
+    setLoading(true);
+    try {
+      const picked = await AudioEngine.pickAndScanFolder();
+      if (!picked) {
+        setLoading(false);
+        return;
+      }
+      const tracks: Track[] = (picked.tracks || []).map((item) => ({
+        id: item.id,
+        title: item.title,
+        artist: item.artist,
+        uri: item.uri,
+        durationMs: item.durationMs || 0,
+        format: item.format || "MP3",
+        folder: item.folder || picked.folderName || "Carpeta",
+      }));
+
+      if (tracks.length === 0) {
+        Alert.alert(
+          t("reproductor_empty_folder_title", "Carpeta sin audio"),
+          t(
+            "reproductor_empty_folder_desc",
+            "No se encontraron archivos MP3, FLAC, WAV, M4A u OGG en esa carpeta ni en sus subcarpetas.",
+          ),
+        );
         setLoading(false);
         return;
       }
 
-      // Paginated scan up to 2,000 audio files so large music libraries load completely
-      const allAssets: MediaLibrary.Asset[] = [];
-      let after: string | undefined = undefined;
-      let hasNext = true;
-      let pages = 0;
-
-      while (hasNext && pages < 10) {
-        const media = await MediaLibrary.getAssetsAsync({
-          mediaType: "audio",
-          first: 200,
-          after,
-          sortBy: [[MediaLibrary.SortBy.creationTime, false]],
-        });
-        allAssets.push(...media.assets);
-        hasNext = media.hasNextPage;
-        after = media.endCursor;
-        pages++;
-      }
-
-      const tracks: Track[] = allAssets.map((asset) => {
-        const ext = (asset.filename.split(".").pop() || "MP3").toUpperCase();
-        const validFormat = (
-          ["FLAC", "MP3", "M4A", "WAV", "AAC"].includes(ext) ? ext : "MP3"
-        ) as Track["format"];
-        const folder = extractFolderName(asset.uri);
-
-        return {
-          id: asset.id,
-          title: asset.filename.replace(/\.[^/.]+$/, ""),
-          artist: folder,
-          uri: asset.uri,
-          durationMs: Math.round((asset.duration || 0) * 1000),
-          format: validFormat,
-          folder,
-        };
+      // Merge into scanned view and switch to Folders/Songs so user sees everything
+      setRawScannedFiles((prev) => {
+        const existingUris = new Set(prev.map((p) => p.uri));
+        const merged = [...tracks, ...prev.filter((p) => !existingUris.has(p.uri))];
+        return merged;
       });
-
-      setRawScannedFiles(tracks);
       setSelectedIds(new Set(tracks.map((tr) => tr.id)));
-    } catch {
+
       Alert.alert(
-        t("reproductor_scan_err_title", "No se pudo escanear"),
-        t(
-          "reproductor_scan_err_desc",
-          "Revisa los permisos de audio en tu dispositivo e intenta de nuevo.",
-        ),
+        picked.folderName,
+        t("reproductor_folder_loaded_prompt", {
+          count: tracks.length,
+          defaultValue:
+            "Se encontraron {{count}} canciones (incluyendo subcarpetas). ¿Qué deseas hacer?",
+        }),
+        [
+          {
+            text: t("reproductor_only_explore", "Ver en Explorador"),
+            style: "cancel",
+          },
+          {
+            text: t("reproductor_add_to_queue", "Sumar a la Cola"),
+            onPress: () => {
+              addTracks(tracks);
+              onClose();
+            },
+          },
+          {
+            text: t("reproductor_play_folder", "Reproducir Todo"),
+            onPress: async () => {
+              await setPlaylist(tracks, 0);
+              onClose();
+            },
+          },
+        ],
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      Alert.alert(
+        t("reproductor_scan_err_title", "No se pudo leer la carpeta"),
+        msg ||
+          t(
+            "reproductor_folder_err_desc",
+            "Intenta seleccionar otra carpeta del almacenamiento.",
+          ),
       );
     } finally {
       setLoading(false);
@@ -252,7 +333,7 @@ export const FileExplorerModal: React.FC<FileExplorerModalProps> = ({
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-end bg-black/75">
-        <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl p-5 max-h-[88%]">
+        <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-5 pt-5 pb-14 max-h-[88%]">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center flex-1 mr-2">
@@ -363,26 +444,42 @@ export const FileExplorerModal: React.FC<FileExplorerModalProps> = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Scan Button */}
-              <TouchableOpacity
-                onPress={handleScanDevice}
-                disabled={loading}
-                className="flex-row items-center justify-center py-3 px-4 bg-teal-500 rounded-xl mb-3 shadow-lg shadow-teal-500/20"
-              >
-                {loading ? (
-                  <ActivityIndicator color="#09090b" />
-                ) : (
-                  <RefreshCw color="#09090b" size={16} />
-                )}
-                <Text className="text-zinc-950 font-black text-xs ml-2">
-                  {loading
-                    ? t("reproductor_scanning", "Buscando archivos...")
-                    : t(
-                        "reproductor_scan_button",
-                        "Escanear Música en Dispositivo",
-                      )}
-                </Text>
-              </TouchableOpacity>
+              {/* Action Buttons: Scan Device & Pick Folder (Recursive) */}
+              <View className="flex-row gap-2 mb-3">
+                <TouchableOpacity
+                  onPress={handleScanDevice}
+                  disabled={loading}
+                  className="flex-1 flex-row items-center justify-center py-3 px-3 bg-teal-500 rounded-xl shadow-lg shadow-teal-500/20"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#09090b" />
+                  ) : (
+                    <RefreshCw color="#09090b" size={15} />
+                  )}
+                  <Text
+                    className="text-zinc-950 font-black text-xs ml-1.5"
+                    numberOfLines={1}
+                  >
+                    {loading
+                      ? t("reproductor_scanning", "Buscando...")
+                      : t("reproductor_scan_short", "Escanear Todo")}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handlePickFolder}
+                  disabled={loading}
+                  className="flex-1 flex-row items-center justify-center py-3 px-3 bg-zinc-800 border border-teal-500/40 rounded-xl"
+                >
+                  <FolderPlus color="#2DD4BF" size={15} />
+                  <Text
+                    className="text-teal-300 font-black text-xs ml-1.5"
+                    numberOfLines={1}
+                  >
+                    {t("reproductor_pick_folder", "Elegir Carpeta")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {filteredJunkCount > 0 && (
                 <Text className="text-[10px] text-zinc-400 mb-2 text-center">

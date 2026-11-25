@@ -21,7 +21,7 @@ param(
         "azar-4all",
         "festivos-4all"
     ),
-    [string]$Version = "1.0.0",
+    [string]$Version = "1.0.1",
     [string]$Architectures = "arm64-v8a,armeabi-v7a",
     [switch]$SkipExisting,
     [switch]$CleanIntermediates

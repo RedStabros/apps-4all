@@ -92,6 +92,7 @@ function syncNativeQueue(tracks: Track[]) {
       title: t.title,
       artist: t.artist,
       durationMs: t.durationMs,
+      folder: t.folder || "Music",
     })),
   );
 }
@@ -120,6 +121,10 @@ interface AudioPlayerState {
   excludeJunkAudio: boolean;
   minDurationSec: number;
   excludedFolders: string[];
+
+  // Audiophile DSP options
+  normalizationEnabled: boolean;
+  mixerFadeSeconds: 0 | 3 | 5;
 
   // Actions
   setPlaylist: (tracks: Track[], startIndex?: number) => Promise<void>;
@@ -152,6 +157,8 @@ interface AudioPlayerState {
 
   setBandGain: (bandIndex: number, gainDb: number) => void;
   applyProfile: (profileId: string) => void;
+  setNormalizationEnabled: (enabled: boolean) => void;
+  setMixerFadeSeconds: (seconds: 0 | 3 | 5) => void;
   assignBluetoothProfile: (deviceName: string, profileId: string) => void;
   handleBluetoothDeviceConnected: (deviceName: string) => void;
 }
@@ -179,6 +186,8 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
       excludeJunkAudio: true,
       minDurationSec: 30,
       excludedFolders: [],
+      normalizationEnabled: false,
+      mixerFadeSeconds: 0,
 
       setPlaylist: async (tracks, startIndex = 0) => {
         const safeIdx = Math.max(0, Math.min(startIndex, tracks.length - 1));
@@ -313,7 +322,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
       },
 
       loadTrack: async (index) => {
-        const { playlist } = get();
+        const { playlist, bands } = get();
         if (index < 0 || index >= playlist.length) return;
 
         const track = playlist[index];
@@ -324,15 +333,27 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
           durationMs: finalDuration,
         });
 
+        let opened = false;
         try {
           const res = await AudioEngine.openFile(track.uri);
+          opened = true;
           if (res?.durationMs && res.durationMs > 0) {
             finalDuration = res.durationMs;
             set({ durationMs: finalDuration });
           }
         } catch {
-          // Fallback to metadata duration
+          opened = false;
         }
+
+        if (!opened) {
+          set({ isPlaying: false });
+          return;
+        }
+
+        // Re-sync EQ bands to the native engine
+        bands.forEach((b, idx) => {
+          AudioEngine.setBandParams(idx, b.frequencyHz, b.gainDb, b.qFactor);
+        });
 
         AudioEngine.startForegroundService(
           track.title,
@@ -516,24 +537,17 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
         const {
           playlist,
           currentTrackIndex,
-          positionMs,
           shuffleMode,
           shuffleOrder,
           shuffleCursor,
           loadTrack,
-          seekTo,
         } = get();
 
         if (playlist.length === 0) return;
 
-        // Standard Winamp/Poweramp behavior: if >3s into song, restart current song first
-        if (positionMs > 3000) {
-          seekTo(0);
-          return;
-        }
-
         if (shuffleMode === "cycle" && shuffleOrder.length === playlist.length) {
-          const prevCursor = Math.max(0, shuffleCursor - 1);
+          const prevCursor =
+            shuffleCursor > 0 ? shuffleCursor - 1 : shuffleOrder.length - 1;
           set({ shuffleCursor: prevCursor });
           loadTrack(shuffleOrder[prevCursor]);
           return;
@@ -633,6 +647,16 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
         });
       },
 
+      setNormalizationEnabled: (enabled) => {
+        set({ normalizationEnabled: enabled });
+        AudioEngine.setNormalizationEnabled(enabled);
+      },
+
+      setMixerFadeSeconds: (seconds) => {
+        set({ mixerFadeSeconds: seconds });
+        AudioEngine.setMixerFadeSeconds(seconds);
+      },
+
       assignBluetoothProfile: (deviceName, profileId) => {
         const { bluetoothProfiles } = get();
         set({
@@ -666,10 +690,16 @@ export const useAudioPlayerStore = create<AudioPlayerState>()(
         excludeJunkAudio: state.excludeJunkAudio,
         minDurationSec: state.minDurationSec,
         excludedFolders: state.excludedFolders,
+        normalizationEnabled: state.normalizationEnabled,
+        mixerFadeSeconds: state.mixerFadeSeconds,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.playlist && state.playlist.length > 0) {
           syncNativeQueue(state.playlist);
+        }
+        if (state) {
+          AudioEngine.setNormalizationEnabled(!!state.normalizationEnabled);
+          AudioEngine.setMixerFadeSeconds(state.mixerFadeSeconds || 0);
         }
       },
     },

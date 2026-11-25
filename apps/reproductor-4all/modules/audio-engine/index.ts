@@ -26,6 +26,7 @@ export interface PlaybackStatus {
   positionMs: number;
   durationMs: number;
   isPlaying: boolean;
+  isFinished?: boolean;
 }
 
 export interface BluetoothDeviceEvent {
@@ -34,13 +35,39 @@ export interface BluetoothDeviceEvent {
 }
 
 export interface MediaButtonEvent {
-  action: "NEXT" | "PREVIOUS" | "PLAY" | "PAUSE" | "PLAY_ID";
+  action: "NEXT" | "PREVIOUS" | "PLAY" | "PAUSE" | "PLAY_ID" | "TRACK_ENDED";
   mediaId?: string;
+}
+
+export interface ScannedTrack {
+  id: string;
+  title: string;
+  artist: string;
+  uri: string;
+  durationMs: number;
+  format: "FLAC" | "MP3" | "M4A" | "WAV" | "AAC";
+  folder: string;
+  pathHint?: string;
+}
+
+export interface PickedFolderResult {
+  folderName: string;
+  tracks: ScannedTrack[];
 }
 
 export const AudioEngine = {
   async openFile(path: string): Promise<{ durationMs: number }> {
     return NativeAudioEngine.openFile(path);
+  },
+
+  async scanDeviceAudio(): Promise<ScannedTrack[]> {
+    if (Platform.OS !== "android") return [];
+    return NativeAudioEngine.scanDeviceAudio();
+  },
+
+  async pickAndScanFolder(): Promise<PickedFolderResult | null> {
+    if (Platform.OS !== "android") return null;
+    return NativeAudioEngine.pickAndScanFolder();
   },
 
   play(): void {
@@ -68,12 +95,42 @@ export const AudioEngine = {
     NativeAudioEngine.setBandParams(bandIndex, frequencyHz, gainDb, qFactor);
   },
 
+  setVisualizerEnabled(enabled: boolean): void {
+    if (Platform.OS !== "android") return;
+    try {
+      NativeAudioEngine.setVisualizerEnabled(enabled);
+    } catch {}
+  },
+
+  setNormalizationEnabled(enabled: boolean): void {
+    if (Platform.OS !== "android") return;
+    try {
+      NativeAudioEngine.setNormalizationEnabled(enabled);
+    } catch {}
+  },
+
+  setMixerFadeSeconds(seconds: number): void {
+    if (Platform.OS !== "android") return;
+    try {
+      NativeAudioEngine.setMixerFadeSeconds(seconds);
+    } catch {}
+  },
+
   async getPlaybackStatus(): Promise<PlaybackStatus> {
     return NativeAudioEngine.getPlaybackStatus();
   },
 
+  async getVisualizerData(): Promise<{ spectrum: number[]; waveform: number[] }> {
+    if (Platform.OS !== "android") return { spectrum: [], waveform: [] };
+    try {
+      return await NativeAudioEngine.getVisualizerData();
+    } catch {
+      return { spectrum: [], waveform: [] };
+    }
+  },
+
   syncAutoQueue(
-    tracks: Array<{ id: string; title: string; artist: string; durationMs: number }>,
+    tracks: Array<{ id: string; title: string; artist: string; durationMs: number; folder?: string }>,
   ): void {
     if (Platform.OS !== "android") return;
     try {

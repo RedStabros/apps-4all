@@ -30,6 +30,12 @@ import {
   Settings,
   Tag,
   Share2,
+  Timer,
+  VolumeX,
+  CloudRain,
+  AudioLines,
+  Waves,
+  Coffee,
 } from "lucide-react-native";
 import { useTimerStore, AmbientSoundType } from "../store/useTimerStore";
 import { Button4All, SettingsModal4All } from "@apps4all/ui-components";
@@ -45,18 +51,18 @@ const SOUND_PRESETS: Array<{
   type: AmbientSoundType;
   labelKey: string;
   fallback: string;
-  icon: string;
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
 }> = [
-  { type: "none", labelKey: "enfoque_sound_none", fallback: "Silencio", icon: "🔕" },
-  { type: "rain", labelKey: "enfoque_sound_rain", fallback: "Lluvia", icon: "🌧️" },
+  { type: "none", labelKey: "enfoque_sound_none", fallback: "Silencio", Icon: VolumeX },
+  { type: "rain", labelKey: "enfoque_sound_rain", fallback: "Lluvia", Icon: CloudRain },
   {
     type: "whitenoise",
     labelKey: "enfoque_sound_white",
     fallback: "Ruido Blanco",
-    icon: "📻",
+    Icon: AudioLines,
   },
-  { type: "waves", labelKey: "enfoque_sound_waves", fallback: "Olas", icon: "🌊" },
-  { type: "cafe", labelKey: "enfoque_sound_cafe", fallback: "Café", icon: "☕" },
+  { type: "waves", labelKey: "enfoque_sound_waves", fallback: "Olas", Icon: Waves },
+  { type: "cafe", labelKey: "enfoque_sound_cafe", fallback: "Café", Icon: Coffee },
 ];
 
 export default function MainScreen() {
@@ -296,14 +302,14 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       {/* Header */}
       <View className="py-3.5 px-5 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
         <View className="flex-row items-center flex-1 mr-2">
           <View className="w-8 h-8 rounded-full bg-amber-500/20 items-center justify-center mr-2">
-            <Text className="text-base">🍅</Text>
+            <Timer size={18} color={accentHex} />
           </View>
           <Text
             className="text-xl font-black text-zinc-900 dark:text-white"
@@ -529,28 +535,37 @@ export default function MainScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 8 }}
           >
-            {SOUND_PRESETS.map((snd) => (
-              <TouchableOpacity
-                key={snd.type}
-                onPress={() => setAmbientSound(snd.type)}
-                className={`px-3.5 py-2 rounded-2xl flex-row items-center border ${
-                  ambientSound === snd.type
-                    ? "bg-amber-700 dark:bg-amber-400 border-amber-700 dark:border-amber-400"
-                    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                }`}
-              >
-                <Text className="mr-1.5 text-sm">{snd.icon}</Text>
-                <Text
-                  className={`text-xs font-bold ${
-                    ambientSound === snd.type
-                      ? "text-white dark:text-zinc-950"
-                      : "text-zinc-700 dark:text-zinc-300"
+            {SOUND_PRESETS.map((snd) => {
+              const IconComp = snd.Icon;
+              const isSelected = ambientSound === snd.type;
+              return (
+                <TouchableOpacity
+                  key={snd.type}
+                  onPress={() => setAmbientSound(snd.type)}
+                  className={`px-3.5 py-2 rounded-2xl flex-row items-center border ${
+                    isSelected
+                      ? "bg-amber-700 dark:bg-amber-400 border-amber-700 dark:border-amber-400"
+                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                   }`}
                 >
-                  {t(snd.labelKey, snd.fallback)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View className="mr-1.5">
+                    <IconComp
+                      size={15}
+                      color={isSelected ? (isDark ? "#09090b" : "#ffffff") : accentHex}
+                    />
+                  </View>
+                  <Text
+                    className={`text-xs font-bold ${
+                      isSelected
+                        ? "text-white dark:text-zinc-950"
+                        : "text-zinc-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    {t(snd.labelKey, snd.fallback)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
 
@@ -653,10 +668,10 @@ export default function MainScreen() {
         onRequestClose={() => setShowSettings(false)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
           className="flex-1 justify-end bg-black/50"
         >
-          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-zinc-900 rounded-t-3xl px-6 pt-6 pb-14">
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-xl font-black text-zinc-900 dark:text-white">
                 {t("enfoque_custom_intervals", "Intervalos Personalizados")}

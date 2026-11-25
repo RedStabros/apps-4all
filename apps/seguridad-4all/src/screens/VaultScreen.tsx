@@ -318,7 +318,7 @@ export default function VaultScreen({ navigation }: any) {
           >
             {visiblePasswords[item.id]
               ? item.passwordEncrypted
-              : "••••••••••••••••"}
+              : "⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢⬢"}
           </Text>
           <View className="flex-row items-center gap-1.5">
             <TouchableOpacity
@@ -357,7 +357,7 @@ export default function VaultScreen({ navigation }: any) {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-white dark:bg-zinc-900"
     >
       <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">

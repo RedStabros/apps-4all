@@ -10,6 +10,23 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Lock,
+  Sun,
+  Moon,
+  Smartphone,
+  Shield,
+  FileText,
+  Scale,
+  RefreshCw,
+  Code2,
+  Terminal,
+  X,
+  Check,
+  ChevronRight,
+  ExternalLink,
+} from "lucide-react-native";
 import { useSharedSettingsStore, ThemeOption } from "./useSharedSettingsStore";
 import { LegalModal4All } from "./LegalModal4All";
 import { ECOSYSTEM_CONFIG } from "./ecosystemConfig";
@@ -77,7 +94,7 @@ function SettingsRow({
   onPress,
   isLast = false,
 }: {
-  icon: string;
+  icon: ReactNode;
   label: string;
   sublabel?: string;
   right?: ReactNode;
@@ -93,7 +110,9 @@ function SettingsRow({
         !isLast ? "border-b border-zinc-100 dark:border-zinc-800" : ""
       }`}
     >
-      <Text className="text-xl mr-3 w-7 text-center">{icon}</Text>
+      <View className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 items-center justify-center mr-3">
+        {icon}
+      </View>
       <View className="flex-1 mr-2">
         <Text className="text-sm font-semibold text-zinc-900 dark:text-white">
           {label}
@@ -148,14 +167,18 @@ export function SettingsModal4All({
       });
       if (!res.ok) throw new Error("Network error");
       const data = await res.json();
-      const slug = appName
+      const rawSlug = appName
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/\s+/g, "-");
-      const entry =
-        data?.apps?.[slug] ||
-        Object.values(data?.apps || {}).find((_: any) => false);
+      const SLUG_ALIASES: Record<string, string> = {
+        "notas-de-voz-4all": "notas-voz-4all",
+        "lupa-y-linterna-4all": "lupa-4all",
+        "festivos-colombia-4all": "festivos-4all",
+      };
+      const slug = SLUG_ALIASES[rawSlug] || rawSlug;
+      const entry = data?.apps?.[slug];
       const remoteVer = entry?.version || appVersion;
       const downloadUrl =
         entry?.downloadUrl || ECOSYSTEM_CONFIG.GITHUB_RELEASES_URL;
@@ -201,10 +224,18 @@ export function SettingsModal4All({
     }
   };
 
-  const themeOptions: { value: ThemeOption; label: string; icon: string }[] = [
-    { value: "light", label: tr("settings_theme_light", "Claro"), icon: "☀️" },
-    { value: "dark", label: tr("settings_theme_dark", "Oscuro"), icon: "🌙" },
-    { value: "system", label: tr("settings_theme_system", "Sistema"), icon: "📱" },
+  const themeOptions: {
+    value: ThemeOption;
+    label: string;
+    Icon: React.ComponentType<{ size?: number; color?: string }>;
+  }[] = [
+    { value: "light", label: tr("settings_theme_light", "Claro"), Icon: Sun },
+    { value: "dark", label: tr("settings_theme_dark", "Oscuro"), Icon: Moon },
+    {
+      value: "system",
+      label: tr("settings_theme_system", "Sistema"),
+      Icon: Smartphone,
+    },
   ];
 
   return (
@@ -214,9 +245,12 @@ export function SettingsModal4All({
         animationType="slide"
         presentationStyle="pageSheet"
       >
-        <View className="flex-1 bg-zinc-100 dark:bg-zinc-950">
+        <SafeAreaView
+          edges={["top", "bottom"]}
+          className="flex-1 bg-zinc-100 dark:bg-zinc-950"
+        >
           {/* ── Header ── */}
-          <View className="pt-14 pb-4 px-6 flex-row items-center justify-between bg-zinc-100 dark:bg-zinc-950">
+          <View className="pt-4 pb-4 px-6 flex-row items-center justify-between bg-zinc-100 dark:bg-zinc-950">
             <View>
               <Text className="text-2xl font-black text-zinc-900 dark:text-white">
                 {tr("settings", "Ajustes")}
@@ -229,9 +263,7 @@ export function SettingsModal4All({
               onPress={onClose}
               className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 items-center justify-center"
             >
-              <Text className="text-zinc-600 dark:text-zinc-300 font-bold text-lg leading-none">
-                ✕
-              </Text>
+              <X size={18} color="#71717a" />
             </TouchableOpacity>
           </View>
 
@@ -247,7 +279,7 @@ export function SettingsModal4All({
                   className="w-10 h-10 rounded-full items-center justify-center mr-3"
                   style={{ backgroundColor: accentColor + "22" }}
                 >
-                  <Text className="text-xl">🔒</Text>
+                  <Lock size={19} color={accentColor} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-zinc-900 dark:text-white">
@@ -267,27 +299,30 @@ export function SettingsModal4All({
             <View className="px-5 mb-6">
               <SectionHeader title={tr("settings_appearance", "Apariencia")} />
               <View className="flex-row bg-white dark:bg-zinc-900 rounded-2xl p-1.5 border border-zinc-200 dark:border-zinc-800">
-                {themeOptions.map((opt) => (
-                  <TouchableOpacity
-                    key={opt.value}
-                    onPress={() => setTheme(opt.value)}
-                    className="flex-1 py-2.5 rounded-xl items-center justify-center"
-                    style={
-                      theme === opt.value
-                        ? { backgroundColor: accentColor }
-                        : {}
-                    }
-                  >
-                    <Text className="text-base mb-0.5">{opt.icon}</Text>
-                    <Text
-                      className={`text-[10px] font-bold ${
-                        theme === opt.value ? "text-white" : "text-zinc-500"
-                      }`}
+                {themeOptions.map((opt) => {
+                  const IconComp = opt.Icon;
+                  const active = theme === opt.value;
+                  return (
+                    <TouchableOpacity
+                      key={opt.value}
+                      onPress={() => setTheme(opt.value)}
+                      className="flex-1 py-2.5 rounded-xl items-center justify-center"
+                      style={active ? { backgroundColor: accentColor } : {}}
                     >
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <IconComp
+                        size={17}
+                        color={active ? "#ffffff" : "#71717a"}
+                      />
+                      <Text
+                        className={`text-[10px] font-bold mt-1 ${
+                          active ? "text-white" : "text-zinc-500"
+                        }`}
+                      >
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
 
@@ -316,12 +351,7 @@ export function SettingsModal4All({
                       {lang.name}
                     </Text>
                     {language === lang.code && (
-                      <Text
-                        style={{ color: accentColor }}
-                        className="font-black text-base"
-                      >
-                        ✓
-                      </Text>
+                      <Check size={17} color={accentColor} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -352,43 +382,31 @@ export function SettingsModal4All({
               <SectionHeader title={tr("settings_legal", "Legal y Privacidad")} />
               <View className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
                 <SettingsRow
-                  icon="🛡️"
+                  icon={<Shield size={16} color={accentColor} />}
                   label={tr("settings_privacy_policy", "Política de Privacidad")}
                   sublabel={tr(
                     "settings_privacy_sub",
                     "100% Offline, sin rastreadores ni telemetría",
                   )}
                   onPress={() => setShowLegalModal(true)}
-                  right={
-                    <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                      ›
-                    </Text>
-                  }
+                  right={<ChevronRight size={16} color="#a1a1aa" />}
                 />
                 <SettingsRow
-                  icon="📜"
+                  icon={<FileText size={16} color={accentColor} />}
                   label={tr("settings_terms", "Términos y Condiciones")}
                   sublabel={tr(
                     "settings_terms_sub",
                     "Uso no comercial y arquitectura Local-First",
                   )}
                   onPress={() => setShowLegalModal(true)}
-                  right={
-                    <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                      ›
-                    </Text>
-                  }
+                  right={<ChevronRight size={16} color="#a1a1aa" />}
                 />
                 <SettingsRow
-                  icon="⚖️"
+                  icon={<Scale size={16} color={accentColor} />}
                   label={tr("settings_license", "Licencia del Software")}
                   sublabel="PolyForm Noncommercial 1.0.0"
                   onPress={() => setShowLegalModal(true)}
-                  right={
-                    <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                      ›
-                    </Text>
-                  }
+                  right={<ChevronRight size={16} color="#a1a1aa" />}
                   isLast
                 />
               </View>
@@ -399,13 +417,13 @@ export function SettingsModal4All({
               <SectionHeader title={tr("settings_about", "Acerca de")} />
               <View className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
                 <SettingsRow
-                  icon="📱"
+                  icon={<Smartphone size={16} color={accentColor} />}
                   label={appName}
                   sublabel={`v${appVersion} • Para Todos (4All)`}
                 />
                 {Platform.OS !== "ios" && (
                   <SettingsRow
-                    icon="🔄"
+                    icon={<RefreshCw size={16} color={accentColor} />}
                     label={tr("settings_check_updates", "Buscar actualizaciones")}
                     sublabel={tr(
                       "settings_check_updates_sub",
@@ -416,15 +434,13 @@ export function SettingsModal4All({
                       checkingUpdate ? (
                         <ActivityIndicator size="small" color={accentColor} />
                       ) : (
-                        <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                          ›
-                        </Text>
+                        <ChevronRight size={16} color="#a1a1aa" />
                       )
                     }
                   />
                 )}
                 <SettingsRow
-                  icon="🔍"
+                  icon={<Code2 size={16} color={accentColor} />}
                   label={tr("settings_source_code", "Código Fuente Público")}
                   sublabel={tr(
                     "settings_source_code_sub",
@@ -433,14 +449,10 @@ export function SettingsModal4All({
                   onPress={() =>
                     Linking.openURL(ECOSYSTEM_CONFIG.GITHUB_REPO_URL)
                   }
-                  right={
-                    <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                      ↗
-                    </Text>
-                  }
+                  right={<ExternalLink size={15} color="#a1a1aa" />}
                 />
                 <SettingsRow
-                  icon="💻"
+                  icon={<Terminal size={16} color={accentColor} />}
                   label={ECOSYSTEM_CONFIG.AUTHOR_BRAND_NAME}
                   sublabel={tr(
                     "settings_made_by",
@@ -449,11 +461,7 @@ export function SettingsModal4All({
                   onPress={() =>
                     Linking.openURL(ECOSYSTEM_CONFIG.PORTFOLIO_URL)
                   }
-                  right={
-                    <Text className="text-zinc-300 dark:text-zinc-600 text-base">
-                      ↗
-                    </Text>
-                  }
+                  right={<ExternalLink size={15} color="#a1a1aa" />}
                   isLast
                 />
               </View>
@@ -468,7 +476,7 @@ export function SettingsModal4All({
               )}
             </Text>
           </ScrollView>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       {/* Nested Legal / Privacy / Terms Modal */}

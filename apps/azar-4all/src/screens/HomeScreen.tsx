@@ -18,7 +18,7 @@ import { useAzarStore } from "../store/useAzarStore";
 import { format } from "date-fns";
 import { Badge4All, SettingsModal4All, Button4All } from "@apps4all/ui-components";
 import * as Haptics from "expo-haptics";
-import { Sparkles, Settings, Disc3 } from "lucide-react-native";
+import { Sparkles, Settings, Disc3, Trophy } from "lucide-react-native";
 
 type Mode = "dice" | "coin" | "number" | "list" | "teams" | "wheel";
 
@@ -203,11 +203,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         {/* Header */}
@@ -515,9 +515,12 @@ export default function HomeScreen() {
                       key={idx}
                       className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm"
                     >
-                      <Text className="font-black text-amber-700 dark:text-amber-400 text-base mb-2">
-                        🏆 {t("azar_team", "Equipo")} {idx + 1} ({team.length})
-                      </Text>
+                      <View className="flex-row items-center mb-2">
+                        <Trophy size={16} color={accentHex} />
+                        <Text className="font-black text-amber-700 dark:text-amber-400 text-base ml-1.5">
+                          {t("azar_team", "Equipo")} {idx + 1} ({team.length})
+                        </Text>
+                      </View>
                       <View className="flex-row flex-wrap gap-2">
                         {team.map((member, mIdx) => (
                           <View

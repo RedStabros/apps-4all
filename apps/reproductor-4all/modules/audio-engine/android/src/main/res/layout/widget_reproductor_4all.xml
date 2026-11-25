@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_reproductor"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="14dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:id="@+id/widget_info_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:id="@+id/widget_track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Reproductor 4All"
+            android:textColor="#FAFAFA"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_track_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Toca para abrir tu música"
+            android:textColor="#2DD4BF"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/widget_btn_prev"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Anterior"
+        android:src="@android:drawable/ic_media_previous"
+        android:tint="#E4E4E7" />
+
+    <ImageButton
+        android:id="@+id/widget_btn_play_pause"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Reproducir o Pausar"
+        android:src="@android:drawable/ic_media_play"
+        android:tint="#2DD4BF" />
+
+    <ImageButton
+        android:id="@+id/widget_btn_next"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Siguiente"
+        android:src="@android:drawable/ic_media_next"
+        android:tint="#E4E4E7" />
+
+</LinearLayout>
+

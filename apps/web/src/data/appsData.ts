@@ -1,4 +1,4 @@
-// appsData.ts — Fuente de verdad para las 15 aplicaciones del ecosistema 4All en la web (v1.0.0 — 100% Offline)
+// appsData.ts — Fuente de verdad para las 15 aplicaciones del ecosistema 4All en la web (v1.0.1 — 100% Offline)
 export interface AppFeature {
   title: string;
   description: string;
@@ -68,7 +68,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Apuntes 4All',
     category: 'productivity',
     iconUrl: '/icons/apuntes-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/apuntes-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/apuntes-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Bloc de notas ultrarrápido con bóveda privada cifrada, Markdown y listas interactivas.',
@@ -136,7 +136,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Seguridad 4All',
     category: 'productivity',
     iconUrl: '/icons/seguridad-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/seguridad-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/seguridad-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Generador de contraseñas y frases seguras con bóveda criptográfica ilimitada.',
@@ -202,7 +202,7 @@ export const APPS_DATA: AppData[] = [
     name: 'PDF 4All',
     category: 'productivity',
     iconUrl: '/icons/pdf-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/pdf-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/pdf-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Suite de 8 herramientas PDF en tu dispositivo sin subir archivos a internet.',
@@ -270,7 +270,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Docs 4All',
     category: 'productivity',
     iconUrl: '/icons/docs-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/docs-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/docs-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Visor ultraligero y seguro para Word, Excel, CSV, Markdown y texto plano.',
@@ -334,7 +334,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Notas de Voz 4All',
     category: 'productivity',
     iconUrl: '/icons/notas-voz-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/notas-voz-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/notas-voz-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Grabadora de alta fidelidad con pausa/reanudar, categorías y recorte no destructivo.',
@@ -404,7 +404,7 @@ export const APPS_DATA: AppData[] = [
     name: 'QR 4All',
     category: 'utilities',
     iconUrl: '/icons/qr-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/qr-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/qr-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Generador y escáner QR con estilos, logos persistentes y respaldo JSON local.',
@@ -472,7 +472,7 @@ export const APPS_DATA: AppData[] = [
     name: 'ZIP 4All',
     category: 'utilities',
     iconUrl: '/icons/zip-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/zip-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/zip-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Compresor y extractor ZIP con cifrado AES-256 y extracción selectiva de archivos.',
@@ -536,7 +536,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Fotos Ligeras 4All',
     category: 'utilities',
     iconUrl: '/icons/fotos-ligeras-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/fotos-ligeras-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/fotos-ligeras-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Compresor masivo de fotos con escudo de privacidad EXIF y rotación 90°.',
@@ -600,7 +600,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Lupa y Linterna 4All',
     category: 'utilities',
     iconUrl: '/icons/lupa-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/lupa-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/lupa-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Magnificador digital con presets 1x–4x, congelación nítida y filtros médicos.',
@@ -666,7 +666,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Reproductor 4All',
     category: 'utilities',
     iconUrl: '/icons/reproductor-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/reproductor-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/reproductor-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Reproductor audiófilo offline con motor C++ Oboe, Android Auto y EQ de 5 bandas.',
@@ -738,7 +738,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Enfoque 4All',
     category: 'time-math',
     iconUrl: '/icons/enfoque-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/enfoque-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/enfoque-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Temporizador Pomodoro antidesfase con etiquetas de tarea, ambientes sonoros y rachas.',
@@ -802,7 +802,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Cuentas 4All',
     category: 'time-math',
     iconUrl: '/icons/cuentas-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/cuentas-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/cuentas-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Calculadora de propinas, comensales guardados y platos compartidos para restaurantes.',
@@ -866,7 +866,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Medidas 4All',
     category: 'time-math',
     iconUrl: '/icons/medidas-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/medidas-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/medidas-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Conversor universal con 10 categorías físicas/digitales, favoritos y buscador.',
@@ -930,7 +930,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Azar 4All',
     category: 'time-math',
     iconUrl: '/icons/azar-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/azar-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/azar-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Ruleta 360° con opciones guardadas, dados, monedas y equipos Fisher-Yates.',
@@ -994,7 +994,7 @@ export const APPS_DATA: AppData[] = [
     name: 'Festivos 4All',
     category: 'time-math',
     iconUrl: '/icons/festivos-4all.png',
-    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.0/festivos-4all-v1.0.0.apk',
+    apkUrl: 'https://github.com/RedStabros/apps-4all/releases/download/v1.0.1/festivos-4all-v1.0.1.apk',
     hasAccountOption: false,
     tagline: {
       es: 'Calendario perpetuo de festivos multipaís con filtro "Solo Puentes" y calculadora de días hábiles.',

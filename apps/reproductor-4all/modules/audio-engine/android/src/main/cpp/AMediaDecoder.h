@@ -13,6 +13,7 @@ public:
     ~AMediaDecoder();
 
     bool open(const std::string& filePath);
+    bool openFd(int fd, int64_t length);
     void start();
     void pause();
     void resume();
@@ -22,6 +23,7 @@ public:
     int64_t getDurationMs() const { return mDurationMs.load(); }
     int64_t getPositionMs() const { return mPositionMs.load(); }
     bool isPlaying() const { return mIsPlaying.load(); }
+    bool isFinished() const { return mFinished.load(); }
     int32_t getSampleRate() const { return mSampleRate; }
     int32_t getChannelCount() const { return mChannelCount; }
 
@@ -36,6 +38,7 @@ private:
     std::thread mDecodeThread;
     std::atomic<bool> mIsRunning{false};
     std::atomic<bool> mIsPlaying{false};
+    std::atomic<bool> mFinished{false};
     std::atomic<bool> mSeekRequested{false};
     std::atomic<int64_t> mSeekPositionUs{0};
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Share,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -31,7 +30,7 @@ import {
   Check,
   Palette,
 } from "lucide-react-native";
-import { useQRStore, QRStyleConfig } from "../store/useQRStore";
+import { useQRStore, QRStyleConfig, QRRecord } from "../store/useQRStore";
 import FramedQRCode, { FramedQRCodeRef } from "../components/FramedQRCode";
 import QRStyleSelector from "../components/QRStyleSelector";
 import * as FileSystem from "expo-file-system/legacy";
@@ -112,15 +111,19 @@ const QR_TYPES: TypeConfig[] = [
 
 export default function GeneratorScreen({
   navigation,
+  route,
 }: {
-  navigation: { goBack: () => void; navigate: (screen: string) => void };
+  navigation: { goBack: () => void; navigate: (screen: string, params?: any) => void };
+  route?: { params?: { editRecord?: QRRecord } };
 }) {
   const { t } = useTranslation();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const accentHex = isDark ? "#2DD4BF" : "#0F766E";
 
-  const { saveCreatedQR } = useQRStore();
+  const { saveCreatedQR, updateCreatedQR } = useQRStore();
+  const editRecord = route?.params?.editRecord;
+  const [editingId, setEditingId] = useState<string | null>(editRecord?.id || null);
   const [selectedType, setSelectedType] = useState<QRType>("url");
 
   // Form states
@@ -167,6 +170,68 @@ export default function GeneratorScreen({
     frameColor: "#0f766e",
   });
   const qrSvgRef = useRef<FramedQRCodeRef>(null);
+
+  // Hydrate form when editing an existing saved QR from History
+  useEffect(() => {
+    if (!editRecord) return;
+    setEditingId(editRecord.id);
+    if (editRecord.style) {
+      setStyleConfig(editRecord.style);
+    }
+    const raw = editRecord.data || "";
+    const recType = editRecord.type as QRType;
+    if (recType === "wifi" && raw.startsWith("WIFI:")) {
+      setSelectedType("wifi");
+      const s = raw.match(/S:([^;]*)/)?.[1] || "";
+      const p = raw.match(/P:([^;]*)/)?.[1] || "";
+      const sec = (raw.match(/T:([^;]*)/)?.[1] || "WPA") as "WPA" | "WEP" | "nopass";
+      setWifiSsid(s);
+      setWifiPass(p);
+      setWifiSec(sec);
+    } else if (recType === "url" || raw.startsWith("http://") || raw.startsWith("https://")) {
+      if (recType === "whatsapp" && raw.includes("wa.me/")) {
+        setSelectedType("whatsapp");
+        const phoneMatch = raw.match(/wa\.me\/(\d+)/)?.[1] || "";
+        const msgMatch = raw.match(/text=([^&]*)/)?.[1] || "";
+        setWaPhone(phoneMatch);
+        setWaMsg(decodeURIComponent(msgMatch));
+      } else if (recType === "paypal" && raw.includes("paypal.me/")) {
+        setSelectedType("paypal");
+        setPpUser(raw.replace(/^https?:\/\/(www\.)?paypal\.me\//, ""));
+      } else {
+        setSelectedType("url");
+        setUrl(raw);
+      }
+    } else if (recType === "email" && raw.startsWith("mailto:")) {
+      setSelectedType("email");
+      const [toPart, query = ""] = raw.replace(/^mailto:/, "").split("?");
+      setEmailTo(toPart || "");
+      setEmailSub(decodeURIComponent(query.match(/subject=([^&]*)/)?.[1] || ""));
+      setEmailBody(decodeURIComponent(query.match(/body=([^&]*)/)?.[1] || ""));
+    } else if (recType === "phone" && raw.startsWith("tel:")) {
+      setSelectedType("phone");
+      setPhoneNum(raw.replace(/^tel:/, ""));
+    } else if (recType === "sms" && raw.startsWith("smsto:")) {
+      setSelectedType("sms");
+      const parts = raw.replace(/^smsto:/, "").split(":");
+      setSmsPhone(parts[0] || "");
+      setSmsMsg(parts.slice(1).join(":"));
+    } else if (recType === "bitcoin" && raw.startsWith("bitcoin:")) {
+      setSelectedType("bitcoin");
+      const [addr, q = ""] = raw.replace(/^bitcoin:/, "").split("?");
+      setBtcAddr(addr || "");
+      setBtcAmount(q.match(/amount=([^&]*)/)?.[1] || "");
+    } else if (recType === "vcard" && raw.includes("BEGIN:VCARD")) {
+      setSelectedType("vcard");
+      setVcardName(raw.match(/FN:([^\n]*)/)?.[1] || "");
+      setVcardPhone(raw.match(/TEL:([^\n]*)/)?.[1] || "");
+      setVcardEmail(raw.match(/EMAIL:([^\n]*)/)?.[1] || "");
+      setVcardOrg(raw.match(/ORG:([^\n]*)/)?.[1] || "");
+    } else {
+      setSelectedType("text");
+      setPlainText(raw);
+    }
+  }, [editRecord]);
 
   // Compute standard static payload
   const qrData = useMemo(() => {
@@ -237,12 +302,38 @@ export default function GeneratorScreen({
 
   const isValid = qrData.length > 0 && qrData !== "https://";
 
-  // Save to Device Gallery
+  const exportQrPng = (): Promise<string> =>
+    new Promise((resolve, reject) => {
+      if (!qrSvgRef.current) {
+        reject(new Error("QR ref not ready"));
+        return;
+      }
+      qrSvgRef.current.toDataURL(async (rawBase64: string) => {
+        try {
+          const cleanBase64 = (rawBase64 || "")
+            .replace(/^data:image\/\w+;base64,/, "")
+            .replace(/\s+/g, "");
+          if (!cleanBase64 || cleanBase64.length < 32) {
+            reject(new Error("Empty PNG data"));
+            return;
+          }
+          const path = `${FileSystem.cacheDirectory}qr4all_${Date.now()}.png`;
+          await FileSystem.writeAsStringAsync(path, cleanBase64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          resolve(path);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    });
+
+  // Save PNG Image to Device Gallery (write-only permission for Android 13+)
   const handleSaveToGallery = async () => {
     if (!qrSvgRef.current || !isValid) return;
 
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
         Alert.alert(
           t("qr_perm_gallery_title", "Permiso de galería"),
@@ -254,68 +345,53 @@ export default function GeneratorScreen({
         return;
       }
 
-      qrSvgRef.current.toDataURL(async (data: string) => {
-        try {
-          const path = `${FileSystem.cacheDirectory}qr_${Date.now()}.png`;
-          await FileSystem.writeAsStringAsync(path, data, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          await MediaLibrary.saveToLibraryAsync(path);
-          Alert.alert(
-            t("zip_success", "¡Éxito!"),
-            t(
-              "qr_saved_gallery_success",
-              "¡Código QR guardado en Fotos!",
-            ),
-          );
-        } catch {
-          Alert.alert(
-            t("qr_err_save_title", "No se pudo guardar"),
-            t(
-              "qr_err_save_desc",
-              "Verifica el espacio disponible en tu dispositivo e intenta de nuevo.",
-            ),
-          );
-        }
-      });
+      const path = await exportQrPng();
+      await MediaLibrary.saveToLibraryAsync(path);
+      Alert.alert(
+        t("zip_success", "¡Éxito!"),
+        t("qr_saved_gallery_success", "¡Código QR guardado en tu Galería!"),
+      );
     } catch {
       Alert.alert(
         t("qr_err_save_title", "No se pudo guardar"),
         t(
           "qr_err_save_desc",
-          "Verifica el espacio disponible en tu dispositivo e intenta de nuevo.",
+          "Verifica el espacio disponible y los permisos de fotos en tu dispositivo.",
         ),
       );
     }
   };
 
-  // Share Image
+  // Share PNG Image (never falls back to sharing raw text)
   const handleShareImage = async () => {
     if (!qrSvgRef.current || !isValid) return;
 
     try {
-      qrSvgRef.current.toDataURL(async (data: string) => {
-        try {
-          const path = `${FileSystem.cacheDirectory}qr_share.png`;
-          await FileSystem.writeAsStringAsync(path, data, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-
-          if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(path);
-          } else {
-            await Share.share({ message: qrData });
-          }
-        } catch {
-          await Share.share({ message: qrData }).catch(() => {});
-        }
-      });
+      const path = await exportQrPng();
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(path, {
+          mimeType: "image/png",
+          UTI: "public.png",
+          dialogTitle: t("qr_share", "Compartir código QR"),
+        });
+      } else {
+        Alert.alert(
+          t("qr_err_save_title", "No se pudo compartir"),
+          t("qr_err_save_desc", "Tu dispositivo no soporta compartir archivos."),
+        );
+      }
     } catch {
-      Share.share({ message: qrData }).catch(() => {});
+      Alert.alert(
+        t("qr_err_save_title", "No se pudo generar la imagen QR"),
+        t(
+          "qr_err_save_desc",
+          "Intenta nuevamente en un segundo para compartir el PNG.",
+        ),
+      );
     }
   };
 
-  // Save to Local Library
+  // Save or Update in Local Library
   const handleSaveToLibrary = () => {
     if (!isValid) return;
 
@@ -326,12 +402,21 @@ export default function GeneratorScreen({
     else if (selectedType === "url") title = url;
     else title = `${selectedType.toUpperCase()}`;
 
-    saveCreatedQR({
-      type: selectedType,
-      title,
-      data: qrData,
-      style: styleConfig,
-    });
+    if (editingId) {
+      updateCreatedQR(editingId, {
+        type: selectedType,
+        title,
+        data: qrData,
+        style: styleConfig,
+      });
+    } else {
+      saveCreatedQR({
+        type: selectedType,
+        title,
+        data: qrData,
+        style: styleConfig,
+      });
+    }
 
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
@@ -339,11 +424,11 @@ export default function GeneratorScreen({
 
   return (
     <SafeAreaView
-      edges={["top"]}
+      edges={["top", "bottom"]}
       className="flex-1 bg-zinc-50 dark:bg-zinc-950"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         {/* Header */}
@@ -486,11 +571,15 @@ export default function GeneratorScreen({
                       </Text>
                       <TextInput
                         value={url}
-                        onChangeText={setUrl}
+                        onChangeText={(text) => setUrl(text.replace(/\s+/g, ""))}
                         placeholder="https://ejemplo.com"
                         placeholderTextColor="#a1a1aa"
                         className="bg-zinc-50 dark:bg-zinc-800 p-3.5 rounded-2xl text-zinc-900 dark:text-white font-medium"
                         autoCapitalize="none"
+                        autoCorrect={false}
+                        spellCheck={false}
+                        keyboardType="url"
+                        textContentType="URL"
                       />
                     </View>
                   )}
@@ -814,7 +903,10 @@ export default function GeneratorScreen({
 
           {/* Visual QR Code Display Hero */}
           <View className="items-center px-6 mb-6 mt-2">
-            <View className="bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-md border border-zinc-200 dark:border-zinc-800 items-center justify-center">
+            <View
+              className="p-6 rounded-3xl shadow-md border border-zinc-200 dark:border-zinc-800 items-center justify-center"
+              style={{ backgroundColor: isValid ? (styleConfig.bgColor || "#ffffff") : (isDark ? "#18181b" : "#ffffff") }}
+            >
               {isValid ? (
                 <FramedQRCode
                   ref={qrSvgRef}
