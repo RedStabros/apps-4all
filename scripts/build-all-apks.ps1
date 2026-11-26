@@ -28,8 +28,10 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$ParentDir = Split-Path -Parent $RepoRoot
 $BuildScript = Join-Path $PSScriptRoot "build-apk.ps1"
-$OutDir = "D:\APP_development\4All_Builds_APK\v$Version"
+$OutDir = Join-Path $ParentDir "4All_Builds_APK\v$Version"
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $ReportPath = Join-Path $OutDir "BUILD_REPORT.txt"
 
@@ -66,7 +68,7 @@ foreach ($slug in $Apps) {
         "[$idx/$total] OK      | $slug | $sizeMB MB | ${appMin}m | $sha" | Out-File -FilePath $ReportPath -Append -Encoding UTF8
 
         if ($CleanIntermediates) {
-            $androidBuild = "d:\APP_development\Apps_4all\apps\$slug\android\app\build"
+            $androidBuild = Join-Path $RepoRoot "apps\$slug\android\app\build"
             if (Test-Path $androidBuild) {
                 Remove-Item -Recurse -Force $androidBuild -ErrorAction SilentlyContinue
             }

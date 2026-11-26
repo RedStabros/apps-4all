@@ -1,7 +1,10 @@
 param (
     [Parameter(Mandatory = $false)]
-    [string]$OutputDir = "D:\APP_development\4All_Keystores_PRIVADO"
+    [string]$OutputDir = ""
 )
+
+$repoPath = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+if (-not $OutputDir) { $OutputDir = Join-Path (Split-Path -Parent $repoPath) "4All_Keystores_PRIVADO" }
 
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host " [4ALL DEVOPS] Generador de 15 Keystores de Produccion" -ForegroundColor Cyan
@@ -15,7 +18,6 @@ if (-not $keytool) {
 }
 
 # Verificar que OutputDir este FUERA del repositorio Git
-$repoPath = (Resolve-Path "d:\APP_development\Apps_4all").Path
 if ($OutputDir.StartsWith($repoPath, [System.StringComparison]::OrdinalIgnoreCase)) {
     Write-Host "[BLOQUEADO] El directorio de keystores NO puede estar dentro del repositorio Git." -ForegroundColor Red
     exit 1

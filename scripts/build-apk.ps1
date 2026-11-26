@@ -6,10 +6,10 @@ param (
     [string]$Version = "1.0.1",
 
     [Parameter(Mandatory = $false)]
-    [string]$KeystoreDir = "D:\APP_development\4All_Keystores_PRIVADO",
+    [string]$KeystoreDir = "",
 
     [Parameter(Mandatory = $false)]
-    [string]$OutputDir = "D:\APP_development\4All_Builds_APK",
+    [string]$OutputDir = "",
 
     [Parameter(Mandatory = $false)]
     [string]$Architectures = "arm64-v8a,armeabi-v7a"
@@ -17,17 +17,40 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-$repoRoot = "d:\APP_development\Apps_4all"
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$parentDir = Split-Path -Parent $repoRoot
+if (-not $KeystoreDir) { $KeystoreDir = Join-Path $parentDir "4All_Keystores_PRIVADO" }
+if (-not $OutputDir) { $OutputDir = Join-Path $parentDir "4All_Builds_APK" }
+
 $appDir = Join-Path $repoRoot "apps\$AppSlug"
 if (-not (Test-Path $appDir)) {
     Write-Host "[ERROR] App no encontrada: $appDir" -ForegroundColor Red
     exit 1
 }
 
-# Configure SDK & JDK paths
-$env:ANDROID_HOME = "D:\Android\Sdk"
-$env:ANDROID_SDK_ROOT = "D:\Android\Sdk"
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+# Configure SDK & JDK paths dynamically (portable across PCs)
+$androidHome = $env:ANDROID_HOME
+if (-not $androidHome -or -not (Test-Path $androidHome)) { $androidHome = $env:ANDROID_SDK_ROOT }
+if (-not $androidHome -or -not (Test-Path $androidHome)) {
+    $androidHome = @("C:\Android\Sdk", "D:\Android\Sdk", "$env:LOCALAPPDATA\Android\Sdk") | Where-Object { Test-Path $_ } | Select-Object -First 1
+}
+if (-not $androidHome) {
+    Write-Host "[ERROR] Android SDK no encontrado. Configura ANDROID_HOME." -ForegroundColor Red
+    exit 1
+}
+
+$javaHome = $env:JAVA_HOME
+if (-not $javaHome -or -not (Test-Path $javaHome)) {
+    $javaHome = @("C:\Java\jdk-21", "C:\Program Files\Java\jdk-21") | Where-Object { Test-Path $_ } | Select-Object -First 1
+}
+if (-not $javaHome) {
+    Write-Host "[ERROR] JDK 21 no encontrado. Configura JAVA_HOME." -ForegroundColor Red
+    exit 1
+}
+
+$env:ANDROID_HOME = $androidHome
+$env:ANDROID_SDK_ROOT = $androidHome
+$env:JAVA_HOME = $javaHome
 $env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:Path"
 
 # Load signing credentials from .env.signing
@@ -50,6 +73,10 @@ $ksAlias = $creds["${varPrefix}_KEY_ALIAS"]
 $ksStorePass = $creds["${varPrefix}_STORE_PASSWORD"]
 $ksKeyPass = $creds["${varPrefix}_KEY_PASSWORD"]
 
+if ($ksPath -and -not (Test-Path $ksPath)) {
+    $fallbackKs = Join-Path $KeystoreDir (Split-Path -Leaf $ksPath)
+    if (Test-Path $fallbackKs) { $ksPath = $fallbackKs }
+}
 if (-not $ksPath -or -not (Test-Path $ksPath)) {
     Write-Host "[ERROR] Keystore no encontrado para ${AppSlug}: $ksPath" -ForegroundColor Red
     exit 1
@@ -105,9 +132,10 @@ try {
     $utf8NoBom = New-Object System.Text.UTF8Encoding $false
     [System.IO.File]::WriteAllText($buildGradlePath, $gradleContent.TrimStart([char]0xFEFF), $utf8NoBom)
 
-    # 3. Ensure local.properties points to D:\Android\Sdk
+    # 3. Ensure local.properties points to the detected Android SDK
     $localProps = Join-Path $appDir "android\local.properties"
-    "sdk.dir=D\:\\Android\\Sdk" | Out-File -FilePath $localProps -Encoding ASCII
+    $escapedSdk = ($androidHome -replace '\\', '\\') -replace ':', '\:'
+    "sdk.dir=$escapedSdk" | Out-File -FilePath $localProps -Encoding ASCII
 
     # 4. Run Gradle assembleRelease
     Push-Location (Join-Path $appDir "android")

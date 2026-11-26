@@ -43,7 +43,8 @@ if ($apkSignerPath) {
 # 2. Localizar APK
 if (-not $ApkPath) {
     Write-Host "Buscando APKs en outputs de compilacion..." -ForegroundColor Gray
-    $foundApks = Get-ChildItem -Path "d:\APP_development\Apps_4all\apps" -Filter "*release*.apk" -Recurse -Depth 7 -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "node_modules" }
+    $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+    $foundApks = Get-ChildItem -Path (Join-Path $repoRoot "apps") -Filter "*release*.apk" -Recurse -Depth 7 -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "node_modules" }
     if ($foundApks -and $foundApks.Count -gt 0) {
         $ApkPath = $foundApks[0].FullName
         Write-Host "APK localizado: $ApkPath" -ForegroundColor Green
