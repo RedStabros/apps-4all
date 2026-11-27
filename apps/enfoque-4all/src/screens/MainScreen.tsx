@@ -731,7 +731,10 @@ export default function MainScreen() {
         presentationStyle="formSheet"
         onRequestClose={() => setShowInfo(false)}
       >
-        <SafeAreaView className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-6">
+        <SafeAreaView
+          edges={["top", "bottom"]}
+          className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-6"
+        >
           <View className="flex-row justify-between items-center mb-6">
             <Text className="text-2xl font-black text-amber-700 dark:text-amber-400">
               {t("enfoque_info_title", "¿Qué es Pomodoro?")}

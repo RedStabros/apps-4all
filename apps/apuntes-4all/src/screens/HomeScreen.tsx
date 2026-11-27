@@ -9,6 +9,8 @@ import {
   Alert,
   Switch,
   useColorScheme,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -473,7 +475,10 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* New Folder Modal */}
         <Modal visible={isModalVisible} animationType="fade" transparent={true}>
-          <View className="flex-1 bg-black/60 justify-center items-center p-6">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1 bg-black/60 justify-center items-center p-6"
+          >
             <View className="bg-white dark:bg-zinc-900 p-6 rounded-3xl w-full border border-zinc-200 dark:border-zinc-800 shadow-2xl">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-xl font-black text-zinc-900 dark:text-white">
@@ -539,7 +544,7 @@ export default function HomeScreen({ navigation }: any) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
         <SettingsModal4All

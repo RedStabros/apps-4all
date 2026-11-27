@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   PermissionsAndroid,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -332,7 +333,10 @@ export const FileExplorerModal: React.FC<FileExplorerModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end bg-black/75">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1 justify-end bg-black/75"
+      >
         <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-5 pt-5 pb-14 max-h-[88%]">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-3">
@@ -785,7 +789,7 @@ export const FileExplorerModal: React.FC<FileExplorerModalProps> = ({
             </View>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

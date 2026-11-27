@@ -13,6 +13,7 @@ import {
   TextInput,
   Alert,
   AppState,
+  KeyboardAvoidingView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
@@ -967,7 +968,10 @@ export default function PlayerScreen() {
         animationType="slide"
         onRequestClose={() => setPlaylistModalVisible(false)}
       >
-        <View className="flex-1 justify-end bg-black/70">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1 justify-end bg-black/70"
+        >
           <View className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl px-6 pt-6 pb-14 max-h-[75%]">
             <View className="flex-row justify-between items-center mb-4">
               <View>
@@ -1088,7 +1092,7 @@ export default function PlayerScreen() {
               )}
             />
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <FileExplorerModal

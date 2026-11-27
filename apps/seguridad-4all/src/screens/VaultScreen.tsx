@@ -8,6 +8,8 @@ import {
   Modal,
   TextInput,
   useColorScheme,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -441,7 +443,10 @@ export default function VaultScreen({ navigation }: any) {
           transparent={true}
           animationType="fade"
         >
-          <View className="flex-1 bg-black/60 items-center justify-center p-6">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1 bg-black/60 items-center justify-center p-6"
+          >
             <View className="bg-white dark:bg-zinc-900 w-full p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-black text-zinc-900 dark:text-white">
@@ -490,7 +495,7 @@ export default function VaultScreen({ navigation }: any) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
       </View>
     </SafeAreaView>

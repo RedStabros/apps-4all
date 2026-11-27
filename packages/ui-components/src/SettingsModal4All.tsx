@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -133,7 +134,7 @@ export function SettingsModal4All({
   visible,
   onClose,
   appName,
-  appVersion = "1.0.0",
+  appVersion = "1.0.1",
   accentColor,
   appSpecificSection,
   i18nInstance,
@@ -249,6 +250,10 @@ export function SettingsModal4All({
           edges={["top", "bottom"]}
           className="flex-1 bg-zinc-100 dark:bg-zinc-950"
         >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1"
+          >
           {/* ── Header ── */}
           <View className="pt-4 pb-4 px-6 flex-row items-center justify-between bg-zinc-100 dark:bg-zinc-950">
             <View>
@@ -476,6 +481,7 @@ export function SettingsModal4All({
               )}
             </Text>
           </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
 
