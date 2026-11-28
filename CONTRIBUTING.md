@@ -7,7 +7,7 @@ Gracias por tu interés en el ecosistema **Para Todos (4All)**.
 Este repositorio es un proyecto de portafolio personal y técnico desarrollado bajo un modelo **Freeware Propietario con Licencia PolyForm Noncommercial 1.0.0**.
 
 ### 🚫 No se aceptan Contribuciones Externas (No Pull Requests)
-* **Propiedad Exclusiva:** Para preservar la integridad de la propiedad intelectual y garantizar una titularidad limpia de derechos de autor en caso de una futura adquisición o venta del ecosistema, **este repositorio NO acepta Pull Requests, parches, ni aportes de código externos**.
+* **Propiedad Exclusiva:** Para preservar la integridad técnica, la cadena de autoría y la titularidad exclusiva de los derechos de propiedad intelectual del ecosistema, **este repositorio NO acepta Pull Requests, parches, ni aportes de código externos**.
 * **Revisión de Commits:** Todos los commits y ramas son gestionados y firmados exclusivamente por el autor original. Cualquier Pull Request enviado por terceros será cerrado automáticamente sin fusionar.
 
 ### 💡 Reportes de Errores o Sugerencias
